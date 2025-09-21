@@ -2,6 +2,7 @@
 /* Instruction parsing and disassembling */
 
 #include <endian.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -496,7 +497,7 @@ void parse(arm_parser_state_t * dis)
 			dis->input_null_count = 0;
 		}
 
-		printf("[%08lX]\t", old_pc);
+		printf("[%08"PRIX64"]\t", old_pc);
 		printf("<%02X>\n", opcode);
 	}
 	else switch(dis->isa)

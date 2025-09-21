@@ -3636,18 +3636,28 @@ static inline uint32_t uxth32(uint32_t value, uint8_t rotate)
 
 static inline uint64_t umulh64(uint64_t op1, uint64_t op2)
 {
-	// TODO: what if __int128 is not defined
+#ifdef __SIZEOF_INT128__
 	unsigned __int128 result = op1;
 	result *= op2;
 	return result >> 64;
+#else
+# warning No 128-bit integer available
+	// TODO: what if __int128 is not defined
+	return 0;
+#endif
 }
 
 static inline int64_t smulh64(int64_t op1, int64_t op2)
 {
-	// TODO: what if __int128 is not defined
+#ifdef __SIZEOF_INT128__
 	__int128 result = op1;
 	result *= op2;
 	return result >> 64;
+#else
+# warning No 128-bit integer available
+	// TODO: what if __int128 is not defined
+	return 0;
+#endif
 }
 
 static inline int8_t qadd8(int8_t op1, int8_t op2)

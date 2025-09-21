@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <byteswap.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -1141,7 +1142,7 @@ int main(int argc, char * argv[], char * envp[])
 					else
 					{
 						ungetc(c, stdin);
-						scanf("%lX", &loop_address);
+						scanf("%"PRIX64, &loop_address);
 						while((c = getchar()) != '\n')
 							;
 					}

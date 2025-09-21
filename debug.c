@@ -1,6 +1,7 @@
 
 /* Displays current CPU state, checks state change between execution steps */
 
+#include <inttypes.h>
 #include <string.h>
 #include "debug.h"
 #include "jazelle.h"
@@ -467,7 +468,7 @@ static void a64_debug(FILE * file, arm_state_t * cpu, arm_debug_change_t * chang
 	int i;
 	for(i = 0; i < 15; i++)
 	{
-		fprintf(file, "R%d=\t%s%016lX%s\tR%d=\t%s%016lX%s\n",
+		fprintf(file, "R%d=\t%s%016"PRIX64"%s\tR%d=\t%s%016"PRIX64"%s\n",
 			i,
 			change && change->r[i] ? ANSI_BOLD : "",
 			a64_register_get64(cpu, i, PERMIT_SP),
@@ -477,7 +478,7 @@ static void a64_debug(FILE * file, arm_state_t * cpu, arm_debug_change_t * chang
 			a64_register_get64(cpu, i + 16, PERMIT_SP),
 			change && change->r[i + 16] ? ANSI_RESET : "");
 	}
-	fprintf(file, "R%d=\t%s%016lX%s\tSP=\t%s%016lX%s\n",
+	fprintf(file, "R%d=\t%s%016"PRIX64"%s\tSP=\t%s%016"PRIX64"%s\n",
 		i,
 		change && change->r[i] ? ANSI_BOLD : "",
 		a64_register_get64(cpu, i, PERMIT_SP),
@@ -485,7 +486,7 @@ static void a64_debug(FILE * file, arm_state_t * cpu, arm_debug_change_t * chang
 		change && change->r[i + 16] ? ANSI_BOLD : "",
 		a64_register_get64(cpu, i + 16, PERMIT_SP),
 		change && change->r[i + 16] ? ANSI_RESET : "");
-	fprintf(file, "PC=\t%s%016lX%s\t",
+	fprintf(file, "PC=\t%s%016"PRIX64"%s\t",
 		change && change->r[32] ? ANSI_BOLD : "",
 		cpu->r[PC],
 		change && change->r[32] ? ANSI_RESET : "");
@@ -585,7 +586,7 @@ void debug(FILE * file, arm_state_t * cpu, arm_debug_state_t * old_state)
 		if(cpu->pstate.rw != PSTATE_RW_64 && (change.memory_changed_highest & ~(uint64_t)0xFFFFFFFF) == 0)
 			fprintf(file, "%08X", (uint32_t)change.memory_changed_lowest);
 		else
-			fprintf(file, "%016lX", change.memory_changed_lowest);
+			fprintf(file, "%016"PRIX64"", change.memory_changed_lowest);
 		fprintf(file, ":" ANSI_BOLD);
 		int i;
 		for(i = 0; i < 16 && change.memory_changed_lowest + i <= change.memory_changed_highest; i++)

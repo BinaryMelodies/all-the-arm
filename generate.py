@@ -2273,7 +2273,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 									args.append(', simd_operand_type[((opcode2 >> 8) & 0xF) | ((opcode2 >> 1) & 0x10)]')
 							elif fun == 'simd_operand':
 								ins_assert(mode == 'a32' or mode == 't32' or mode == 'a64')
-								fmtstr += '0x%016lX'
+								fmtstr += '0x%016"PRIX64"'
 								if mode == 'a32':
 									args.append(', a32_get_simd_operand(NULL, opcode)')
 								elif mode == 't32':
@@ -2411,7 +2411,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 								args.append(f", {argument}")
 							elif fun == 'bitmask':
 								assert mode == 'a64'
-								fmtstr += '0x%016lX'
+								fmtstr += '0x%016"PRIX64"'
 								if arg == '0':
 									args.append(", a64_get_bitmask32(opcode)")
 								elif arg == '1':
@@ -2497,35 +2497,35 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 								if mode != 'a64':
 									fmtstr += '0x%08X'
 								else:
-									fmtstr += '0x%016lX'
+									fmtstr += '0x%016"PRIX64"'
 								p = p[:-2]
 							elif p.endswith(':1X'):
 								# hexadecimal of 1 hex digit
 								if mode != 'a64':
 									fmtstr += '0x%01X'
 								else:
-									fmtstr += '0x%01lX'
+									fmtstr += '0x%01"PRIX64"'
 								p = p[:-3]
 							elif p.endswith(':2X'):
 								# hexadecimal of 2 hex digits
 								if mode != 'a64':
 									fmtstr += '0x%02X'
 								else:
-									fmtstr += '0x%02lX'
+									fmtstr += '0x%02"PRIX64"'
 								p = p[:-3]
 							elif p.endswith(':4X'):
 								# hexadecimal of 4 hex digits
 								if mode != 'a64':
 									fmtstr += '0x%04X'
 								else:
-									fmtstr += '0x%04lX'
+									fmtstr += '0x%04"PRIX64"'
 								p = p[:-3]
 							elif p.endswith(':8X'):
 								# hexadecimal of 8 hex digits
 								if mode != 'a64':
 									fmtstr += '0x%08X'
 								else:
-									fmtstr += '0x%08lX'
+									fmtstr += '0x%08"PRIX64"'
 								p = p[:-3]
 							elif p.endswith('!offset'):
 								# program counter relative offset, where the program counter value depends on the current instruction set
@@ -2533,7 +2533,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 								if mode != 'a64':
 									fmtstr += '0x%08X'
 								else:
-									fmtstr += '0x%016lX'
+									fmtstr += '0x%016"PRIX64"'
 								p = p[:-7]
 								if mode == 'a32':
 									# For A32 instructions, the program counter points to 8 bytes after the start of the instruction, or 4 bytes after the end of the current one
@@ -2555,7 +2555,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 							elif p.endswith('!shifted_offset'):
 								# In A64 mode, the ADRP instruction uses a version of PC that clears the bottom 12 bits
 								assert mode == 'a64'
-								fmtstr += '0x%016lX'
+								fmtstr += '0x%016"PRIX64"'
 								p = p[:-15]
 								addend = '((dis->pc - 4) & ~0xFFF) + '
 							elif p.endswith('!mem_offset'):
@@ -2622,7 +2622,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 								if mode != 'a64':
 									fmtstr += '%u'
 								else:
-									fmtstr += '%lu'
+									fmtstr += '%"PRIu64"'
 
 							if not finished:
 								value = parse_expression(mode, p, varfields)
@@ -3071,7 +3071,7 @@ def generate_all(method, file):
 		print_file(file, '\t\tdis->input_null_count = 0;')
 		print_file(file, '\t}')
 
-		print_file(file, '\tprintf("[%016lX]\\t", old_pc);')
+		print_file(file, '\tprintf("[%016"PRIX64"]\\t", old_pc);')
 		print_file(file, '\tprintf("<%08X>\\t", opcode);')
 
 	generate_branches('a64', a64_order, '\t', method)
