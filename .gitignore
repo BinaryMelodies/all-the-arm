@@ -3,3 +3,13 @@
 parse.gen.c
 step.gen.c
 emu
+*.class
+*.o
+*.so
+test/*/*.a32*
+test/*/*.m32*
+test/*/*.t32*
+test/*/*.a64*
+test/others/all_isa
+test/abi_Linux.h
+test/env/*.a*.s
