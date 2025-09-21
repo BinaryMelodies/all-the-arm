@@ -1,5 +1,6 @@
 
 CFLAGS= -lm -Wall -DJ32_EMULATE_INTERNALS=1
+#CFLAGS+= -m32
 CFLAGS+= -g
 
 all: emu tests

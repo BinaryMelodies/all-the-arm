@@ -3641,9 +3641,12 @@ static inline uint64_t umulh64(uint64_t op1, uint64_t op2)
 	result *= op2;
 	return result >> 64;
 #else
-# warning No 128-bit integer available
-	// TODO: what if __int128 is not defined
-	return 0;
+	uint64_t result = (op1 & 0xFFFFFFFF) * (op2 & 0xFFFFFFFF);
+	result >>= 32;
+	result += (op1 & 0xFFFFFFFF) * (op2 >> 32);
+	result += (op1 >> 32) * (op2 & 0xFFFFFFFF);
+	result >>= 32;
+	return result + (op1 >> 32) * (op2 >> 32);
 #endif
 }
 
@@ -3654,9 +3657,12 @@ static inline int64_t smulh64(int64_t op1, int64_t op2)
 	result *= op2;
 	return result >> 64;
 #else
-# warning No 128-bit integer available
-	// TODO: what if __int128 is not defined
-	return 0;
+	uint64_t result = (op1 & 0xFFFFFFFF) * (op2 & 0xFFFFFFFF);
+	result >>= 32;
+	result += (op1 & 0xFFFFFFFF) * (op2 >> 32);
+	result += (op1 >> 32) * (op2 & 0xFFFFFFFF);
+	result >>= 32;
+	return result + (op1 >> 32) * (op2 >> 32);
 #endif
 }
 
