@@ -224,3 +224,18 @@ Those marked with _JVM_ are assigned by the emulator, and on a typical hardware 
 | R14      | Jazelle    | -          | pointer to code on entry/exit                     |
 | R15      | ARM        | PC         | pointer to code                                   |
 
+# References
+
+A variety of references were used to map out information on older as well as newer architectures.
+This is a non-exhaustive list of sources that were consulted during the development of this project.
+
+* [ARM official documents](https://developer.arm.com/)
+* [RISC OS 3 Programmer's Reference Manual](http://www.riscos.com/support/developers/asm/fpinstrs.html)
+* Pete Cockerell: ARM Assembly Language Programming
+* [Wikipedia for ARM architecture family](https://en.wikipedia.org/wiki/ARM_architecture_family)
+* [Arc Wiki](https://arcwiki.org.uk/index.php/Main_Page)
+* [WikiChip](https://en.wikichip.org/wiki/arm)
+* [List of ARM processor IDs](https://github.com/bp0/armids/blob/master/arm.ids)
+* [GNU assembler manual](https://sourceware.org/binutils/docs/as/index.html)
+* [GCC manuals](https://gcc.gnu.org/onlinedocs/)
+
