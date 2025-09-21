@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "elf.h"
 #include "jvm.h"
+#include "jazelle.h"
 
 const char * const arm_instruction_set_names[] =
 {
@@ -1166,6 +1167,7 @@ int main(int argc, char * argv[], char * envp[])
 					if(!j32_linux_syscall(cpu))
 					{
 						printf("SWI\n");
+						printf("Unknown Jazelle system call: %d\n", j32_peek_word(cpu, 0));
 						exit(0);
 					}
 					break;
@@ -1180,7 +1182,7 @@ int main(int argc, char * argv[], char * envp[])
 							if(swi_number != 0)
 							{
 								// only EABI allowed
-								printf("SWI\n");
+								printf("SWI #0x%04X\n", swi_number);
 								exit(0);
 							}
 							break;
@@ -1194,7 +1196,8 @@ int main(int argc, char * argv[], char * envp[])
 							// EABI
 							if(!a32_linux_eabi_syscall(cpu))
 							{
-								printf("SWI\n");
+								printf("SWI #0x%06X\n", swi_number);
+								printf("Unknown EABI system call: %d\n", (uint32_t)cpu->r[7]);
 								exit(0);
 							}
 						}
@@ -1203,7 +1206,9 @@ int main(int argc, char * argv[], char * envp[])
 							// OABI
 							if(!a32_linux_oabi_syscall(cpu, swi_number))
 							{
-								printf("SWI\n");
+								printf("SWI #0x%06X\n", swi_number);
+								if(swi_number >= A32_OABI_SYS_BASE)
+									printf("Unknown OABI system call: %d\n", swi_number - A32_OABI_SYS_BASE);
 								exit(0);
 							}
 						}
@@ -1213,9 +1218,15 @@ int main(int argc, char * argv[], char * envp[])
 					{
 						uint16_t swi_number = (arm_fetch32(cpu, cpu->r[PC] - 4) >> 5) & 0xFFFF;
 
-						if(swi_number != 0 || !a64_linux_syscall(cpu))
+						if(swi_number != 0)
 						{
-							printf("SWI\n");
+							printf("SWI #0x%04X\n", swi_number);
+							exit(0);
+						}
+						else if(!a64_linux_syscall(cpu))
+						{
+							printf("SWI #0\n");
+							printf("Unknown 64-bit system call: %"PRId64"\n", cpu->r[8]);
 							exit(0);
 						}
 					}

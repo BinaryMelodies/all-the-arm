@@ -713,17 +713,19 @@ bool a64_linux_syscall(arm_state_t * cpu)
 
 bool j32_linux_syscall(arm_state_t * cpu)
 {
-	uint32_t syscall_number = j32_pop_word(cpu);
+	uint32_t syscall_number = j32_peek_word(cpu, 0);
 	switch(syscall_number)
 	{
 	case A32_SYS_EXIT:
 		{
+			j32_pop_word(cpu);
 			int32_t status = j32_pop_word(cpu);
 			exit(status);
 		}
 		return true;
 	case A32_SYS_WRITE:
 		{
+			j32_pop_word(cpu);
 			int32_t count = j32_pop_word(cpu);
 			uint32_t address = j32_pop_word(cpu);
 			int32_t fd = j32_pop_word(cpu);
