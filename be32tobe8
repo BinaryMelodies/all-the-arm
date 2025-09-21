@@ -1,0 +1,215 @@
+#! /usr/bin/python3
+
+import os
+import sys
+import struct
+
+def read8(file):
+	return struct.unpack('>B', file.read(1))[0]
+
+def read16(file):
+	return struct.unpack('>H', file.read(2))[0]
+
+def read32(file):
+	return struct.unpack('>I', file.read(4))[0]
+
+def readz(file):
+	b = b''
+	c = file.read(1)
+	while c != b'' and c != b'\0':
+		b += c
+		c = file.read(1)
+	return b
+
+def write8(file, value):
+	file.write(struct.pack('>B', value & 0xFF))
+
+def write16(file, value):
+	file.write(struct.pack('>H', value & 0xFFFF))
+
+def write32(file, value):
+	file.write(struct.pack('>I', value & 0xFFFFFFFF))
+
+def write16le(file, value):
+	file.write(struct.pack('<H', value & 0xFFFF))
+
+def write32le(file, value):
+	file.write(struct.pack('<I', value & 0xFFFFFFFF))
+
+ELFCLASS32 = 1
+ELFDATA2MSB = 2
+ET_EXEC = 2
+EM_ARM = 40
+EF_ARM_LE8 = 0x00400000
+EF_ARM_BE8 = 0x00800000
+SHT_SYMTAB = 2
+SHT_STRTAB = 3
+
+def main():
+	if len(sys.argv) < 2:
+		print(f"Usage: {sys.argv[0]} <input file name> [<output file name>]", file = sys.stderr)
+		exit(1)
+
+	input_file_name = sys.argv[1]
+	if len(sys.argv) >= 3:
+		output_file_name = sys.argv[2]
+		with open(input_file_name, 'rb') as in_file:
+			with open(output_file_name, 'wb') as out_file:
+				out_file.write(in_file.read())
+		os.chmod(output_file_name, 0o755) # read/execute by everyone, write by owner
+	else:
+		output_file_name = input_file_name
+
+	with open(output_file_name, 'r+b') as elf_file:
+		if elf_file.read(4) != b'\x7F' b'ELF':
+			print("Not an ELF file", file = sys.stderr)
+			exit(1)
+
+		if read8(elf_file) != ELFCLASS32:
+			print("Not a 32-bit ELF file", file = sys.stderr)
+			exit(1)
+
+		if read8(elf_file) != ELFDATA2MSB:
+			print("Not a big endian ELF file", file = sys.stderr)
+			exit(1)
+
+		elf_file.seek(16, os.SEEK_SET)
+
+		if read16(elf_file) != ET_EXEC:
+			print("Not an executable ELF file", file = sys.stderr)
+			exit(1)
+
+		if read16(elf_file) != EM_ARM:
+			print("Not an ARM ELF file", file = sys.stderr)
+			exit(1)
+
+		elf_file.seek(8, os.SEEK_CUR)
+		e_phoff = read32(elf_file)
+		e_shoff = read32(elf_file)
+		e_flags = read32(elf_file)
+
+		if e_flags & EF_ARM_LE8:
+			print("Bit LE8 set", file = sys.stderr)
+			exit(1)
+
+		if e_flags & EF_ARM_BE8:
+			print("Bit BE8 set", file = sys.stderr)
+			exit(1)
+
+		elf_file.seek(2, os.SEEK_CUR)
+		e_phentsize = read16(elf_file)
+		e_phnum = read16(elf_file)
+		e_shentsize = read16(elf_file)
+		e_shnum = read16(elf_file)
+
+		if e_shnum == 0:
+			print("No section headers present", file = sys.stderr)
+			exit(1)
+
+		# Find symbol table
+
+		for i in range(e_shnum):
+			elf_file.seek(e_shoff + i * e_shentsize, os.SEEK_SET)
+			elf_file.seek(4, os.SEEK_CUR)
+			sh_type = read32(elf_file)
+			if sh_type == SHT_SYMTAB:
+				elf_file.seek(8, os.SEEK_CUR)
+				sh_offset = read32(elf_file)
+				sh_size = read32(elf_file)
+				sh_link = read32(elf_file)
+				elf_file.seek(8, os.SEEK_CUR)
+				sh_entsize = read32(elf_file)
+				break
+		else:
+			print("No symbol table present", file = sys.stderr)
+			exit(1)
+
+		# Get string table offset
+
+		elf_file.seek(e_shoff + sh_link * e_shentsize, os.SEEK_SET)
+		elf_file.seek(16, os.SEEK_CUR)
+		strtab_offset = read32(elf_file)
+
+		mapping_symbols = {}
+		for i in range(0, sh_size, sh_entsize):
+			elf_file.seek(sh_offset + i)
+			name_offset = read32(elf_file)
+			value = read32(elf_file)
+
+			elf_file.seek(strtab_offset + name_offset, os.SEEK_SET)
+			name = readz(elf_file)
+			if name.startswith(b'$a') or name.startswith(b'$t') or name.startswith(b'$d'):
+				# ARM, Thumb or data, respectively
+				if value in mapping_symbols:
+					print("Multiple mapping symbols for same address", file = sys.stderr)
+					exit(1)
+				if name.startswith(b'$a') and (value & 3) != 0:
+					print("Alignment error", file = sys.stderr)
+					exit(1)
+				if name.startswith(b'$t') and (value & 1) != 0:
+					print("Alignment error", file = sys.stderr)
+					exit(1)
+				mapping_symbols[value] = name
+
+		if len(mapping_symbols) == 0:
+			print("No mapping symbols present", file = sys.stderr)
+			exit(1)
+
+		e_flags |= EF_ARM_BE8
+		elf_file.seek(36, os.SEEK_SET)
+		write32(elf_file, e_flags)
+
+		missing_mapping_symbol_warned = False
+
+		for i in range(0, e_phnum):
+			elf_file.seek(e_phoff + i * e_phentsize, os.SEEK_SET)
+			elf_file.seek(4, os.SEEK_CUR)
+			p_offset = read32(elf_file)
+			p_vaddr = read32(elf_file)
+			elf_file.seek(4, os.SEEK_CUR)
+			p_filesz = read32(elf_file)
+
+			first_mapping_symbol_address = max((address for address in mapping_symbols.keys() if address <= p_vaddr), default = None)
+#			if first_mapping_symbol_address is None:
+#				#if not missing_mapping_symbol_warned:
+#				#	print("Warning: not all addresses accounted for via mapping symbols, assuming data")
+#				#	missing_mapping_symbol_warned = True
+#				mode = b'$d'
+#			else:
+#				mode = mapping_symbols[first_mapping_symbol_address]
+			mapping_symbol_addresses = sorted(address for address in mapping_symbols.keys() if p_vaddr < address < p_vaddr + p_filesz)
+
+			for i in range(len(mapping_symbol_addresses) + 1):
+				if i == 0:
+					start_offset = 0
+					if first_mapping_symbol_address is None:
+						start_symbol = b'$d'
+					else:
+						start_symbol = mapping_symbols[first_mapping_symbol_address]
+				else:
+					start_address = mapping_symbol_addresses[i - 1]
+					start_offset = start_address - p_vaddr
+					start_symbol = mapping_symbols[start_address]
+
+				if i == len(mapping_symbol_addresses):
+					end_offset = p_filesz
+				else:
+					end_offset = mapping_symbol_addresses[i] - p_vaddr
+
+				if start_symbol.startswith(b'$a'):
+					elf_file.seek(p_offset + start_offset, os.SEEK_SET)
+					for i in range(start_offset, end_offset, 4):
+						instr = read32(elf_file)
+						elf_file.seek(-4, os.SEEK_CUR)
+						write32le(elf_file, instr)
+				elif start_symbol.startswith(b'$t'):
+					for i in range(start_offset, end_offset, 2):
+						instr = read16(elf_file)
+						elf_file.seek(-2, os.SEEK_CUR)
+						write16le(elf_file, instr)
+				elif start_symbol.startswith(b'$d'):
+					pass
+
+if __name__ == '__main__':
+	main()
+

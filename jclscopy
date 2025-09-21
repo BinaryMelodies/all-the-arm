@@ -1,0 +1,110 @@
+#! /usr/bin/python3
+
+# like objcopy -Obinary, but for Java class files
+
+import os
+import struct
+import sys
+
+def read8(file):
+	return struct.unpack('>B', file.read(1))[0]
+
+def read16be(file):
+	return struct.unpack('>H', file.read(2))[0]
+
+def read32be(file):
+	return struct.unpack('>I', file.read(4))[0]
+
+constant_pool = {}
+
+with open(sys.argv[1], 'rb') as classfile:
+	if classfile.read(4) != b'\xCA\xFE\xBA\xBE':
+		print("Not a valid Java class file", file = sys.stderr)
+		exit(1)
+
+	classfile.seek(4, os.SEEK_CUR)
+
+	constant_pool_count = read16be(classfile)
+	i = 1
+	while i < constant_pool_count:
+		tag = read8(classfile)
+		if tag == 1:
+			# UTF-8
+			length = read16be(classfile)
+			text = classfile.read(length)
+			constant_pool[i] = text
+		elif tag == 3:
+			# Integer
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 4:
+			# Float
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 5:
+			# Long
+			classfile.seek(8, os.SEEK_CUR)
+			i += 1
+		elif tag == 6:
+			# Double
+			classfile.seek(8, os.SEEK_CUR)
+			i += 1
+		elif tag == 7:
+			# Class
+			classfile.seek(2, os.SEEK_CUR)
+		elif tag == 8:
+			# String
+			classfile.seek(2, os.SEEK_CUR)
+		elif tag == 9:
+			# Fieldref
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 10:
+			# Methodref
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 11:
+			# InterfaceMethodref
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 12:
+			# NameAndType
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 15:
+			# MethodHandle
+			classfile.seek(4, os.SEEK_CUR)
+		elif tag == 16:
+			# MethodType
+			classfile.seek(2, os.SEEK_CUR)
+		elif tag == 18:
+			# InvokeDynamic
+			classfile.seek(4, os.SEEK_CUR)
+		else:
+			print("Invalid tag in constant pool: 0x{tag:02X}", file = sys.stderr)
+			exit(1)
+		i += 1
+
+	classfile.seek(6, os.SEEK_CUR)
+	interface_count = read16be(classfile)
+	classfile.seek(2 * interface_count, os.SEEK_CUR)
+	field_count = read16be(classfile)
+	classfile.seek(2 * field_count, os.SEEK_CUR)
+
+	method_count = read16be(classfile)
+
+	binfile = open(sys.argv[2], 'wb')
+
+	for i in range(method_count):
+		classfile.seek(6, os.SEEK_CUR)
+		attributes_count = read16be(classfile)
+		for j in range(attributes_count):
+			name_index = read16be(classfile)
+			length = read32be(classfile)
+			if constant_pool.get(name_index) == b'Code':
+				classfile.seek(4, os.SEEK_CUR)
+				data_length = read32be(classfile)
+				data = classfile.read(data_length)
+				binfile.write(data)
+				if len(data) & 3:
+					binfile.write(bytes(-len(data) & 3))
+				classfile.seek(length - 8 - data_length, os.SEEK_CUR)
+			else:
+				classfile.seek(length, os.SEEK_CUR)
+
+	binfile.close()
+

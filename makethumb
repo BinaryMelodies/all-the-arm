@@ -1,0 +1,88 @@
+#! /usr/bin/python3
+
+import os
+import sys
+import struct
+
+ELFCLASS32 = 1
+ELFDATA2LSB = 1
+ELFDATA2MSB = 2
+ET_EXEC = 2
+EM_ARM = 40
+
+EI_DATA = None
+
+def ei_data():
+	global EI_DATA
+	if EI_DATA == ELFDATA2LSB:
+		return '<'
+	elif EI_DATA == ELFDATA2MSB:
+		return '>'
+
+def read8(file):
+	return struct.unpack('<B', file.read(1))[0]
+
+def read16(file):
+	return struct.unpack(ei_data() + 'H', file.read(2))[0]
+
+def read32(file):
+	return struct.unpack(ei_data() + 'I', file.read(4))[0]
+
+def readz(file):
+	b = b''
+	c = file.read(1)
+	while c != b'' and c != b'\0':
+		b += c
+		c = file.read(1)
+	return b
+
+def write8(file, value):
+	file.write(struct.pack(ei_data() + 'B', value & 0xFF))
+
+def write16(file, value):
+	file.write(struct.pack(ei_data() + 'H', value & 0xFFFF))
+
+def write32(file, value):
+	file.write(struct.pack(ei_data() + 'I', value & 0xFFFFFFFF))
+
+def main():
+	global EI_DATA
+
+	if len(sys.argv) < 2:
+		print(f"Usage: {sys.argv[0]} <input file name> [<output file name>]", file = sys.stderr)
+		exit(1)
+
+	input_file_name = sys.argv[1]
+	if len(sys.argv) >= 3:
+		output_file_name = sys.argv[2]
+		with open(input_file_name, 'rb') as in_file:
+			with open(output_file_name, 'wb') as out_file:
+				out_file.write(in_file.read())
+		os.chmod(output_file_name, 0o755) # read/execute by everyone, write by owner
+	else:
+		output_file_name = input_file_name
+
+	with open(output_file_name, 'r+b') as elf_file:
+		if elf_file.read(4) != b'\x7F' b'ELF':
+			print("Not an ELF file", file = sys.stderr)
+			exit(1)
+
+		if read8(elf_file) != ELFCLASS32:
+			print("Not a 32-bit ELF file", file = sys.stderr)
+			exit(1)
+
+		EI_DATA = read8(elf_file)
+		if EI_DATA != ELFDATA2LSB and EI_DATA != ELFDATA2MSB:
+			print("Invalid byte order ELF file", file = sys.stderr)
+			exit(1)
+
+		elf_file.seek(24, os.SEEK_SET)
+
+		e_entry = read32(elf_file)
+		e_entry |= 1
+		elf_file.seek(-4, os.SEEK_CUR)
+		write32(elf_file, e_entry)
+
+if __name__ == '__main__':
+	main()
+
