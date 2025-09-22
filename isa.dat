@@ -61,7 +61,7 @@ isa	A32
 #### ARMv1
 #### Data processing
 
-code	cccc00O0000SnnnnddddOOOOOOOOmmmm
+code	cccc00O0000SnnnnddddOOOOOOOOOOOO
 exclude	1111............................	since	5
 exclude	......0.................1..1....
 asm	and{cond(c)}{S?s:} r{d}, r{n}, {operand()}
@@ -14047,7 +14047,7 @@ begin
 	// TODO
 end
 
-code	0Q001110WW1mmmmm01000nnnnndddddd
+code	0Q001110WW1mmmmm010000nnnnnddddd
 exclude	........11......................
 asm	addhn{Q?2:} {d.Q'W!v}, {n.Q'W!v}, {m.Q'W!v}
 added	8

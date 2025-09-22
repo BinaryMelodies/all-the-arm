@@ -7,7 +7,7 @@ all: emu tests
 	make -C test
 
 clean:
-	rm -rf emu parse.gen.c step.gen.c
+	rm -rf emu parse.gen.c step.gen.c isa.html
 	make -C test clean
 
 distclean: clean
@@ -18,7 +18,7 @@ emu: main.c main.h arm.h dis.c dis.h emu.c emu.h jazelle.c jazelle.h debug.c deb
 	gcc -o $@ main.c main.h dis.c emu.c elf.c jvm.c debug.c ${CFLAGS}
 
 parse.gen.c step.gen.c: generate.py isa.dat
-	python3 $^ parse.gen.c step.gen.c
+	python3 $^ -p parse.gen.c -s step.gen.c -h isa.html
 
 .PHONY: all clean distclean tests
 
