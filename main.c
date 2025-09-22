@@ -1166,7 +1166,7 @@ int main(int argc, char * argv[], char * envp[])
 				case ISA_JAZELLE:
 					if(!j32_linux_syscall(cpu))
 					{
-						printf("SWI\n");
+						printf("%s\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC");
 						printf("Unknown Jazelle system call: %d\n", j32_peek_word(cpu, 0));
 						exit(0);
 					}
@@ -1182,7 +1182,7 @@ int main(int argc, char * argv[], char * envp[])
 							if(swi_number != 0)
 							{
 								// only EABI allowed
-								printf("SWI #0x%04X\n", swi_number);
+								printf("%s #0x%04X\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC", swi_number);
 								exit(0);
 							}
 							break;
@@ -1196,7 +1196,7 @@ int main(int argc, char * argv[], char * envp[])
 							// EABI
 							if(!a32_linux_eabi_syscall(cpu))
 							{
-								printf("SWI #0x%06X\n", swi_number);
+								printf("%s #0x%06X\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC", swi_number);
 								printf("Unknown EABI system call: %d\n", (uint32_t)cpu->r[7]);
 								exit(0);
 							}
@@ -1206,7 +1206,7 @@ int main(int argc, char * argv[], char * envp[])
 							// OABI
 							if(!a32_linux_oabi_syscall(cpu, swi_number))
 							{
-								printf("SWI #0x%06X\n", swi_number);
+								printf("%s #0x%06X\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC", swi_number);
 								if(swi_number >= A32_OABI_SYS_BASE)
 									printf("Unknown OABI system call: %d\n", swi_number - A32_OABI_SYS_BASE);
 								exit(0);
@@ -1220,12 +1220,12 @@ int main(int argc, char * argv[], char * envp[])
 
 						if(swi_number != 0)
 						{
-							printf("SWI #0x%04X\n", swi_number);
+							printf("SVC #0x%04X\n", swi_number);
 							exit(0);
 						}
 						else if(!a64_linux_syscall(cpu))
 						{
-							printf("SWI #0\n");
+							printf("SVC #0\n");
 							printf("Unknown 64-bit system call: %"PRId64"\n", cpu->r[8]);
 							exit(0);
 						}
