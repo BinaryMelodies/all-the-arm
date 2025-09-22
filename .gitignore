@@ -2,6 +2,7 @@
 *~
 parse.gen.c
 step.gen.c
+isa.html
 emu
 *.class
 *.o
