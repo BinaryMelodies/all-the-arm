@@ -10,6 +10,8 @@ The author shares this code with the expectation that others might find it infor
 This project is an ARM architecture emulator and disassembler, intended to support multiple ARM generations going back to the 1980s.
 The emulator and disassembler supports multiple processor versions, instruction sets and environments, from ARMv1 to ARMv8.
 
+[Some collected information on the ARM architecture](https://html-preview.github.io/?url=https://github.com/BinaryMelodies/all-the-arm/blob/doc/info.html)
+
 # Status
 
 A lot of the ARM architecture is still missing. However, there is sufficient code to run very basic Linux binaries (such as a Hello, World application).

@@ -1,0 +1,3028 @@
+<!doctype html>
+<html>
+<head>
+<title>ARM architecture</title>
+<style>
+tt { font-size: larger; }
+td { text-align: center; }
+h1 { text-align: center; }
+.b1 { font-weight: bold; color: red; }
+.b2 { font-weight: bold; color: green; }
+.b3 { font-weight: bold; color: blue; }
+.b4 { font-weight: bold; color: orange; }
+.b5 { font-weight: bold; color: magenta; }
+.b6 { font-weight: bold; color: cyan; }
+.b7 { font-weight: bold; color: brown; }
+.b8 { font-weight: bold; color: indigo; }
+.v {
+	background: pink;
+}
+.p {
+	background: lightgreen;
+}
+</style>
+</head>
+<body>
+<h1>Version overview</h1>
+
+<table align='center' border='1'>
+<tr>
+<td><b>Year</b></td>
+<td><b>Version</b></td>
+<td><b>Features</b></td>
+<td><b>Implementations</b></td>
+<td><b>FPU support</b></td>
+</tr>
+
+<tr>
+<td>1985</td>
+<td>ARMv1</td>
+<td>26-bit mode</td>
+<td>ARM1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>1986</td>
+<td>ARMv2</td>
+<td></td>
+<td>ARM2</td>
+<td>AKA20/FPPC/WE32206</td>
+</tr>
+
+<tr>
+<td rowspan='2'>1989</td>
+<td rowspan='2'>ARMv2a</td>
+<td rowspan='2'></td>
+<td>ARM250</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ARM3</td>
+<td>FPA10 (WE32206 compatible)</td>
+</tr>
+
+<tr>
+<td rowspan='5'>1993</td>
+<td rowspan='5'>ARMv3</td>
+<td rowspan='5'>added 32-bit mode</td>
+<td>ARM60</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ARM600</td>
+<td>FPA10 (WE32206 compatible)</td>
+</tr>
+
+<tr>
+<td>ARM610</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ARM700</td>
+<td>FPA11 (WE32206 compatible)</td>
+</tr>
+
+<tr>
+<td>ARM710<br>ARM710a</td>
+<td></td>
+</tr>
+
+<tr>
+<td>1994</td>
+<td>ARMv4</td>
+<td>removed 26-bit mode</td>
+<td>ARM810</td>
+<td></td>
+</tr>
+
+<tr>
+<td>1994</td>
+<td>ARMv4T</td>
+<td>added Thumb mode</td>
+<td>ARM7TDMI<br>ARM710T<br>ARM720T<br>ARM740T<br>ARM9TDMI<br>ARM920T<br>ARM922T<br>ARM940T</td>
+<td></td>
+</tr>
+
+<tr>
+<td>1999</td>
+<td>ARMv5</td>
+<td></td>
+<td></td>
+<td>VFPv1</td>
+</tr>
+
+<tr>
+<td>1999</td>
+<td>ARMv5TE</td>
+<td>added Enhanced DSP</td>
+<td>ARM946E-S<br>ARM966E-S<br>ARM968E-S<br>ARM996HS<br>ARM1020E<br>ARM1022E</td>
+<td rowspan='5'>VFPv2</td>
+</tr>
+
+<tr>
+<td>2001</td>
+<td>ARMv5TEJ</td>
+<td>added Jazelle mode</td>
+<td>ARM7EJ-S<br>ARM926EJ-S<br>ARM1026EJ-S</td>
+</tr>
+
+<tr>
+<td>2002</td>
+<td>ARMv6</td>
+<td></td>
+<td>ARM1136J-S</td>
+</tr>
+
+<tr>
+<td>2003</td>
+<td>ARMv6T2</td>
+<td>Thumb-2 mode (Thumb extension)</td>
+<td>ARM1156T2-S</td>
+</tr>
+
+<tr>
+<td>2003</td>
+<td>ARMv6Z</td>
+<td>TrustZone<br>(no Thumb-2 mode)</td>
+<td>ARM1176JZ</td>
+</tr>
+
+<tr>
+<td>2004</td>
+<td>ARMv7-M</td>
+<td>only Thumb-2 mode</td>
+<td>Cortex-M3</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2005</td>
+<td>ARMv6K</td>
+<td>Multiprocessing<br>(no Thumb-2 mode)</td>
+<td>ARM11MPCore</td>
+<td>VFPv2</td>
+</tr>
+
+<tr>
+<td>2005</td>
+<td>ARMv7-A</td>
+<td>ThumbEE mode<br>trivial Jazelle</td>
+<td>Cortex-A8</td>
+<td>VFPv3<br>VFPv4</td>
+</tr>
+
+<tr>
+<td>2007</td>
+<td>ARMv6-M</td>
+<td>only partial Thumb-2 mode</td>
+<td>Cortex-M7</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2011</td>
+<td>ARMv8</td>
+<td>64-bit mode<br>removed ThumbEE mode</td>
+<td>Cortex-A53</td>
+<td rowspan='2'>VFPv4</td>
+</tr>
+
+<tr>
+<td>2021</td>
+<td>ARMv9</td>
+<td></td>
+<td>Cortex-A510<br>Cortex-A710<br>Cortex-X2</td>
+</tr>
+</table>
+
+<h1>Feature grid for pre-ARMv7 processors</h1>
+
+<table align='center' border='1'>
+<tr>
+<td colspan='2'></td>
+<td>ARM26</td>
+<td>SWP</td>
+<td>ARM32</td>
+<td>MULL</td>
+<td>Thumb</td>
+<td>Enhanced DSP</td>
+<td>Double ops</td>
+<td>Jazelle</td>
+<td>Multiprocessing</td>
+<td>Security<br>Extensions</td>
+<td>Thumb-2</td>
+</tr>
+
+<tr>
+<td colspan='2'>ARMv1</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td rowspan='2'>ARMv2</td>
+<td>ARMv2</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv2a</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td rowspan='3'>ARMv3</td>
+<td>ARMv3</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv3M</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv3G</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td rowspan='4'>ARMv4</td>
+<td>ARMv4</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv4xM</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv4T</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv4TxM</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td rowspan='7'>ARMv5</td>
+<td>ARMv5</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5xM</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5T</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5TxM</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5TE</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5TExP</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv5TEJ</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td rowspan='5'>ARMv6</td>
+<td>ARMv6</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv6K</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv6Z</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv6KZ</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>ARMv6T2</td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td>&check;</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td>&check;</td>
+</tr>
+
+</table>
+
+<h1>Instruction sets</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td rowspan='2'>Execution state</td>
+<td colspan='3'>Instruction set</td>
+<td rowspan='2'>Address space</td>
+<td rowspan='2'>Instruction size</td>
+<td rowspan='2'>Registers</td>
+<td rowspan='2'>Introduced</td>
+<td rowspan='2'>Removed</td>
+<td rowspan='2' width='18'>J</td>
+<td rowspan='2' width='18'>T</td>
+<td rowspan='2' width='18'><small>M4</small></td>
+</tr>
+
+<tr>
+<td>Name</td>
+<td>Mode</td>
+<td>Variant</td>
+</tr>
+
+<!-- A26 -->
+<tr>
+<td>(AArch26)</td>
+<td rowspan='2'>ARM32<br>A32</td>
+<td colspan='2'>ARM26</td>
+<td>26-bit</td>
+<td rowspan='2'>32-bit</td>
+<td rowspan='2'>16 &times; 32-bit</td>
+<td>ARMv1</td>
+<td>ARMv3G<br>ARMv4</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td><a title="on processors that support both ARM26/ARM32">0</a></td>
+</tr>
+
+<!-- A32 -->
+<tr>
+<td rowspan='5'>AArch32</td>
+<td colspan='2'>ARM32</td>
+<td>32-bit</td>
+<td>ARMv3</td>
+<td style='background:gray;'></td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+
+<!-- T16 -->
+<tr>
+<td rowspan='3'>Thumb<br>T32</td>
+<td rowspan='2'>Thumb</td>
+<td>Thumb</td>
+<td rowspan='3'>32-bit</td>
+<td>16-bit<br>(1 or 2 32-bit)</td>
+<td rowspan='3'>8 &times; 32-bit<br>16 &times; 32-bit</td>
+<td>ARMv4T<br>ARMv5T<br>ARMv6</td>
+<td><a title="upgraded to Thumb-2">(ARMv6T2)</td></td>
+<td rowspan='2'>0</td>
+<td rowspan='2'>1</td>
+<td rowspan='2'>1</td>
+</tr>
+
+<!-- T32 -->
+<tr>
+<td>Thumb-2</td>
+<td rowspan='2'>16-bit<br>32-bit</td>
+<td>ARMv6T2</td>
+<td style='background:gray;'></td>
+</tr>
+
+<!-- TEE -->
+<tr>
+<td colspan='2'>ThumbEE<br>Jazelle RCT</td>
+<td>ARMv7</td>
+<td>ARMv8</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+
+<tr>
+<!-- Java -->
+<td>Java bytecode</td>
+<td colspan='2'>Jazelle<br>Jazelle DBX</td>
+<td>32-bit</td>
+<td>8-bit<br>or multiple bytes</td>
+<td style='background:gray;'></td>
+<td>ARMv5TEJ<br>ARMv6</td>
+<td><a title="trivial implementation">(ARMv7)</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+
+<tr>
+<!-- A64 -->
+<td rowspan='6'>AArch64</td>
+<td colspan='3'>ARM64<br>A64</td>
+<td>64-bit</td>
+<td>32-bit</td>
+<td>32 &times; 64-bit</td>
+<td>ARMv8</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td><a title="no processor supports both ARM26 and ARM64">0</a></td>
+</tr>
+</table>
+
+<h1>State transitions</h1>
+
+<table align='center' border='1'>
+<tr>
+<td>To</td>
+<td rowspan='2'>ARM26<br>(to v3)</td>
+<td rowspan='2'>ARM32<br>(v3+)</td>
+<td rowspan='2'>Thumb<br>(v4T+)</td>
+<td rowspan='2'>ThumbEE<br>(v7 only)</td>
+<td rowspan='2'>Jazelle<br>(v5TEJ+)</td>
+<td rowspan='2'>ARM64<br>(v8-A)</td>
+</tr>
+
+<tr>
+<td>From</td>
+</tr>
+
+<tr>
+<td colspan='7'></td>
+</tr>
+
+<tr>
+<td><i>exception</i></td>
+<td>&check;</td>
+<td>&check;</td>
+<td>(v6T2+)</td>
+<td style='background:lightgray;'></td>
+<td style='background:lightgray;'></td>
+<td>&check;</td>
+</tr>
+
+<tr>
+<td colspan='7'></td>
+</tr>
+
+<tr>
+<td>ARM26</td>
+<td style='background:lightgray;'>&mdash;</td>
+<td>&star;</td>
+<td style='background:black;'></td>
+<td style='background:black;'></td>
+<td style='background:black;'></td>
+<td style='background:black;'></td>
+</tr>
+
+<tr>
+<td>ARM32</td>
+<td>&star;</td>
+<td style='background:lightgray;'>&mdash;</td>
+<td>&check;</td>
+<td style='background:lightgray;'></td>
+<td>&check;</td>
+<td style='background:lightgray;'></td>
+</tr>
+
+<tr>
+<td>Thumb</td>
+<td style='background:black;'></td>
+<td>&check;</td>
+<td style='background:lightgray;'>&mdash;</td>
+<td>&check;</td>
+<td>(v6T2+)</td>
+<td style='background:lightgray;'></td>
+</tr>
+
+<tr>
+<td>ThumbEE</td>
+<td style='background:black;'></td>
+<td style='background:lightgray;'></td>
+<td>&check;</td>
+<td style='background:lightgray;'>&mdash;</td>
+<td style='background:lightgray;'></td>
+<td style='background:black;'></td>
+</tr>
+
+<tr>
+<td>Jazelle</td>
+<td style='background:black;'></td>
+<td style='background:lightgray;'></td>
+<td style='background:lightgray;'></td>
+<td style='background:lightgray;'></td>
+<td style='background:lightgray;'>&mdash;</td>
+<td style='background:black;'></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td style='background:black;'></td>
+<td style='background:lightgray;'></td>
+<td style='background:lightgray;'></td>
+<td style='background:black;'></td>
+<td style='background:black;'></td>
+<td style='background:lightgray;'>&mdash;</td>
+</tr>
+</table>
+
+<p>Legend:</p>
+<ul>
+<li>&check; means a dedicated usermode instruction exists since the modes were introduced</li>
+<li>a parenthesized version number indicates if only certain processors have a usermode instruction</li>
+<li>&star; means that only a privileged instruction exists since the modes were introduced</li>
+<li>a light gray field means that there is no such instruction</li>
+<li>a black field means that no processor contains both modes</li>
+</ul>
+
+<h2>State transition instruction types</h2>
+
+<table align='center' border='1'>
+<tr>
+<td>Instruction</td>
+<td>From</td>
+<td>To</td>
+<td>Meaning</td>
+</tr>
+
+<tr>
+<td colspan='4'>Interworking</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt>BX R<i>m</i></tt></td>
+<td>ARM32 (v4T)<br>Thumb</td>
+<td>ARM32<br>Thumb</td>
+<td rowspan='2'>Copy bits 1-31 to PC<br>Set CPSR.T to bit 0</td>
+</tr>
+
+<tr>
+<td>ThumbEE</td>
+<td>ThumbEE</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt>BLX R<i>m</i></tt></td>
+<td>ARM32 (v5T)<br>Thumb (v5T)</td>
+<td>ARM32<br>Thumb</td>
+<td rowspan='2'>Copy PC to LR<br>Copy bits 1-31 to PC<br>Set CPSR.T to bit 0</td>
+</tr>
+
+<tr>
+<td>ThumbEE</td>
+<td>ThumbEE</td>
+</tr>
+
+<tr>
+<td><tt>BLX <i>label</i></tt></td>
+<td>ARM32 (v5T)<br>Thumb (v5T)</td>
+<td>ARM32<br>Thumb</td>
+<td>Copy PC to LR<br>Copy value to PC<br>Toggle CPSR.T</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt>BXJ R<i>m</i></tt></td>
+<td>ARM32 (v5TEJ)<br>Thumb (v6T2)</td>
+<td>ARM32<br>Thumb<br>Jazelle</td>
+<td>(Jazelle implemented)<br>Set CPSR.J to 1 and CPSR.T to 0<hr>(trivial Jazelle)<br>same as <tt>BX R<i>m</i></tt></td>
+</tr>
+
+<tr>
+<td>ThumbEE</td>
+<td>ThumbEE</td>
+<td>same as <tt>BX R<i>m</i></tt></td>
+</tr>
+
+<tr>
+<td><tt>LDR PC, &hellip;</tt><br><tt>LDM &hellip;, {&hellip;, PC}</tt></td>
+<td>ARM32 (v5T)<br>Thumb (v5T)</td>
+<td>ARM32<br>Thumb</td>
+<td>Copy bits 1-31 to PC<br>Set CPSR.T to bit 0</td>
+</tr>
+
+<tr>
+<td><tt><i>alu</i> PC, &hellip;</tt></td>
+<td>ARM32 (v7)</td>
+<td>ARM32<br>Thumb</td>
+<td>Copy bits 1-31 to PC<br>Set CPSR.T to bit 0</td>
+</tr>
+
+<tr>
+<td colspan='4'>Mode change</td>
+</tr>
+
+<tr>
+<td><tt>MSR CPSR, &hellip;</tt></td>
+<td>ARM26 (v3)<br>ARM32</td>
+<td>ARM26<br>ARM32</td>
+<td>Copy value to CPSR</td>
+</tr>
+
+<tr>
+<td><tt>ENTERX</tt></td>
+<td>Thumb (v7)<br>ThumbEE</td>
+<td>ThumbEE</td>
+<td>Set CPSR.J to 1</td>
+</tr>
+
+<tr>
+<td><tt>LEAVEX</tt></td>
+<td>Thumb (v7)<br>ThumbEE</td>
+<td>Thumb</td>
+<td>Set CPSR.J to 0</td>
+</tr>
+
+<tr>
+<td colspan='4'>Exception return</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt><i>alu</i>S PC, &hellip;</tt></td>
+<td>ARM26</td>
+<td>ARM26</td>
+<td>Copy bits 2-25 to PC<br>Copy bits 0, 1, 26-31 to CPSR</td>
+</tr>
+
+<tr>
+<td>ARM32</td>
+<td>ARM32<br>Thumb (v4T)<br>Jazelle (v5TEJ)<br>ThumbEE (v7 only)</td>
+<td>Copy value to PC<br>Copy SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td><tt>SUBS PC, LR, &hellip;</tt></td>
+<td>Thumb (v6T2)<br>
+<td>ARM32<br>Thumb (v4T)<br>Jazelle (v5TEJ)<br>ThumbEE (v7 only)</td>
+<td>Copy value to PC<br>Copy SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td><tt>ERET</tt></td>
+<td>ARM32<br>Thumb (v6T2)<br>ARM64</td>
+<td>ARM32<br>Thumb (v4T)<br>Jazelle (v5TEJ)<br>ThumbEE (v7 only)</td>
+<td>Copy value to PC<br>Copy SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td><tt>RFE</tt></td>
+<td>ARM32 (v6)<br>Thumb (v6T2)</td>
+<td>any except ARM64</td>
+<td>Copy value to PC<br>Copy SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td><tt>LDM &hellip;, {&hellip;, PC}^</tt></td>
+<td>ARM32</td>
+<td>any except ARM64</td>
+<td>Copy value to PC<br>Copy SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td colspan='4'>Exception taken</td>
+</tr>
+
+<tr>
+<td rowspan='3'><i>exceptions</i><br><tt>SWI/SVC &hellip;</tt><br><i>undefined</i></td>
+<td>ARM26</td>
+<td>ARM26<br>ARM32</td>
+<td rowspan='3'>Loads PC with vector value<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td>ARM32<br>Thumb<br>ThumbEE</td>
+<td>ARM32<br>Thumb (v6T2)<br>ARM64</td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td>ARM64</td>
+</tr>
+
+<tr>
+<td><i>exceptions</i></td>
+<td>Jazelle</td>
+<td>ARM32<br>Thumb (v6T2)</td>
+<td>Loads PC with vector value<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td><i>undefined</i></td>
+<td>Jazelle</td>
+<td>ARM32</td>
+<td>Loads PC with vector value from handler table<br>(bits 10 to 31 of R5)<br>Sets CPSR.J to 0</td>
+</tr>
+
+<tr>
+<td><tt>BKPT &hellip;</tt></td>
+<td>ARM32 (v5)<br>Thumb (v5T)<br>Thumb</td>
+<td>ARM32<br>Thumb (v6T2)<br>ARM64</td>
+<td>Loads PC with vector value (breakpoint)<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td><tt>BRK &hellip;</tt></td>
+<td>ARM64</td>
+<td>ARM64</td>
+<td>Loads PC with vector value (breakpoint)<br>Loads CPSR with mode</td>
+</tr>
+
+<tr>
+<td><tt>IMPDEP2</tt> (0xFF)</td>
+<td>Jazelle</td>
+<td>ARM32<br>Thumb (v6T2)</td>
+<td>Loads PC with vector value (breakpoint)<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt>HVC &hellip;</tt></td>
+<td>ARM32 (v7VE)<br>Thumb (v7VE)</td>
+<td>ARM32<br>Thumb (v6T2)<br>ARM64</td>
+<td rowspan='2'>Loads PC with vector value (hypervisor entry)<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td>ARM64</td>
+</tr>
+
+<tr>
+<td rowspan='2'><tt>SMI/SMC &hellip;</tt></td>
+<td>ARM32 (v6K)<br>Thumb (v7+sec)</td>
+<td>ARM32<br>Thumb (v6T2)<br>ARM64</td>
+<td rowspan='2'>Loads PC with vector value (monitor entry)<br>Loads CPSR with mode and J/T values</td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td>ARM64</td>
+</tr>
+
+</table>
+
+<h1>R15 register access</h1>
+
+<table align='center' border='1'>
+<tr>
+<td rowspan='2'></td>
+<td colspan='2'>v1-v4</td>
+<td rowspan='2'>v5-v6</td>
+<td rowspan='2'>v7+</td>
+</tr>
+
+<tr>
+<td>A26</td>
+<td>A32</td>
+</tr>
+
+<tr>
+<td colspan='5'><b>Read R15</b></td>
+</tr>
+
+<tr>
+<td>R15, &hellip; shift Rm</td>
+<td colspan='2'>ins + 12</td>
+<td colspan='2'>UNPREDICTABLE</td>
+</tr>
+
+<tr>
+<td>STR R15, &hellip;<br>STM &hellip;, {R15}</td>
+<td colspan='2'>ins + 12</td>
+<td colspan='2'>ins + 8<br>OR<br>ins + 12</td>
+</tr>
+
+<tr>
+<td>MCR Cd, R15</td>
+<td colspan='2'>ins + 12</td>
+<td colspan='2'>UNPREDICTABLE</td>
+</tr>
+
+<tr>
+<td colspan='5'><b>Write R15</b></td>
+</tr>
+
+<tr>
+<td>LDM &hellip;, {R15}^</td>
+<td>load status bits</td>
+<td colspan='3'>move SPSR to CPSR</td>
+</tr>
+
+<tr>
+<td>arithmeticS R15, &hellip;</td>
+<td>copy all bits<br>(NZCV only in user mode)</td>
+<td colspan='3'>move SPSR to CPSR<br>(outside user mode)</td>
+</tr>
+
+<tr>
+<td>MRC R15, Cd</td>
+<td colspan='4'>copy NZCV bits only</td>
+</tr>
+</table>
+
+<h1>32-bit registers</h1>
+
+<table align='center' border='1'>
+<tr>
+<td width='80'>Mode</td>
+<td width='80'>USR</td>
+<td width='80'>FIQ</td>
+<td width='80'>IRQ</td>
+<td width='80'>SVC</td>
+<td width='80'>MON</td>
+<td width='80'>ABT</td>
+<td width='80'>HYP</td>
+<td width='80'>UND</td>
+<td width='80'>SYS</td>
+</tr>
+
+<tr>
+<td>Appeared</td>
+<td>ARMv1</td>
+<td>ARMv1</td>
+<td>ARMv1</td>
+<td>ARMv1</td>
+<td>ARMv6Z<br>Security<br>Extension</td>
+<td>ARMv3</td>
+<td>Virt.<br>Extension</td>
+<td>ARMv3</td>
+<td>ARMv4</td>
+</tr>
+
+<tr>
+<td>CPSR[0:3]</td>
+<td>0<br><tt>0000</tt></td>
+<td>1<br><tt>0001</tt></td>
+<td>2<br><tt>0010</tt></td>
+<td>3<br><tt>0011</tt></td>
+<td>6<br><tt>0110</tt></td>
+<td>7<br><tt>0111</tt></td>
+<td>10<br><tt>1010</tt></td>
+<td>11<br><tt>1011</tt></td>
+<td>15<br><tt>1111</tt></td>
+</tr>
+
+<tr>
+<td>R0<br>R1<br>R2<br>R3<br>R4<br>R5<br>R6<br>R7</td>
+<td>R0<br>R1<br>R2<br>R3<br>R4<br>R5<br>R6<br>R7</td>
+<td colspan='8' style='background:lightgray;'>R0<br>R1<br>R2<br>R3<br>R4<br>R5<br>R6<br>R7</td>
+</tr>
+
+<tr>
+<td>R8<br>R9</td>
+<td>R8<br>R9</td>
+<td>R8_FIQ<br>R9_FIQ<br>(since v2)</td>
+<td colspan='7' style='background:lightgray;'>R8<br>R9</td>
+</tr>
+
+<tr>
+<td>R10<br>R11<br>R12</td>
+<td>R10<br>R11<br>R12</td>
+<td>R10_FIQ<br>R11_FIQ<br>R12_FIQ</td>
+<td colspan='7' style='background:lightgray;'>R10<br>R11<br>R12</td>
+</tr>
+
+<tr>
+<td>R13</td>
+<td>R13</td>
+<td>R13_FIQ</td>
+<td>R13_IRQ</td>
+<td>R13_SVC</td>
+<td>R13_MON</td>
+<td>R13_ABT</td>
+<td>R13_HYP</td>
+<td>R13_UND</td>
+<td style='background:lightgray;'>R13</td>
+</tr>
+
+<tr>
+<td>R14</td>
+<td>R14</td>
+<td>R14_FIQ</td>
+<td>R14_IRQ</td>
+<td>R14_SVC</td>
+<td>R14_MON</td>
+<td>R14_ABT</td>
+<td style='background:lightgray;'>R14</td>
+<td>R14_UND</td>
+<td style='background:lightgray;'>R14</td>
+</tr>
+
+<tr>
+<td>ELR</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td>ELR_EL2</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>R15</td>
+<td>PC</td>
+<td colspan='8' style='background:lightgray;'>PC</td>
+</tr>
+
+<tr>
+<td>SPSR</td>
+<td style='background:gray;'></td>
+<td>SPSR_FIQ</td>
+<td>SPSR_IRQ</td>
+<td>SPSR_SVC</td>
+<td>SPSR_MON</td>
+<td>SPSR_ABT</td>
+<td>SPSR_HYP</td>
+<td>SPSR_UND</td>
+<td style='background:gray;'></td>
+</tr>
+
+</table>
+
+<h1>64-bit registers</h1>
+
+<table align='center' border='1'>
+<tr>
+<td width='80'>Mode</td>
+<td width='80'>EL0</td>
+<td width='80'>EL1t</td>
+<td width='80'>EL1h</td>
+<td width='80'>EL2t</td>
+<td width='80'>EL2h</td>
+<td width='80'>EL3t</td>
+<td width='80'>EL3h</td>
+</tr>
+
+<tr>
+<td>CPSR[0:3]</td>
+<td>0<br><tt>0000</tt></td>
+<td>4<br><tt>0100</tt></td>
+<td>5<br><tt>0101</tt></td>
+<td>8<br><tt>1000</tt></td>
+<td>9<br><tt>1001</tt></td>
+<td>12<br><tt>1100</tt></td>
+<td>13<br><tt>1101</tt></td>
+</tr>
+
+<tr>
+<td>X0<br>&vellip;<br>X30</td>
+<td colspan='7'>X0<br>&vellip;<br>X30</td>
+</tr>
+
+<tr>
+<td>X31</td>
+<td>SP_EL0</td>
+<td>SP_EL0</td>
+<td>SP_EL1</td>
+<td>SP_EL0</td>
+<td>SP_EL2</td>
+<td>SP_EL0</td>
+<td>SP_EL3</td>
+</tr>
+
+<tr>
+<td>PC</td>
+<td colspan='7'>PC</td>
+</tr>
+
+<tr>
+<td>SPSR</td>
+<td style='background:gray;'></td>
+<td colspan='2'>SPSR_EL1</td>
+<td colspan='2'>SPSR_EL2</td>
+<td colspan='2'>SPSR_EL3</td>
+</tr>
+
+<tr>
+<td>ELR</td>
+<td style='background:gray;'></td>
+<td colspan='2'>ELR_EL1</td>
+<td colspan='2'>ELR_EL2</td>
+<td colspan='2'>ELR_EL3</td>
+</tr>
+</table>
+
+<h1>Register correspondence</h1>
+
+<table align='center' border='1'>
+<tr>
+<td width='80'>Mode</td>
+<td width='80'>USR</td>
+<td width='80'>FIQ</td>
+<td width='80'>IRQ</td>
+<td width='80'>SVC</td>
+<td width='80'>MON</td>
+<td width='80'>ABT</td>
+<td width='80'>HYP</td>
+<td width='80'>UND</td>
+<td width='80'>SYS</td>
+</tr>
+
+<tr>
+<td>CPSR[0:3]</td>
+<td>0<br><tt>0000</tt></td>
+<td>1<br><tt>0001</tt></td>
+<td>2<br><tt>0010</tt></td>
+<td>3<br><tt>0011</tt></td>
+<td>6<br><tt>0110</tt></td>
+<td>7<br><tt>0111</tt></td>
+<td>10<br><tt>1010</tt></td>
+<td>11<br><tt>1011</tt></td>
+<td>15<br><tt>1111</tt></td>
+</tr>
+
+<tr>
+<td>R0<br>R1<br>R2<br>R3<br>R4<br>R5<br>R6<br>R7</td>
+<td>W0<br>W1<br>W2<br>W3<br>W4<br>W5<br>W6<br>W7</td>
+<td colspan='8' style='background:lightgray;'>W0<br>W1<br>W2<br>W3<br>W4<br>W5<br>W6<br>W7</td>
+</tr>
+
+<tr>
+<td>R8<br>R9<br>R10<br>R11<br>R12</td>
+<td>W8<br>W9<br>W10<br>W11<br>W12</td>
+<td>W24<br>W25<br>W26<br>W27<br>W28</td>
+<td colspan='7' style='background:lightgray;'>W8<br>W9<br>W10<br>W11<br>W12</td>
+</tr>
+
+<tr>
+<td>R13</td>
+<td>W13</td>
+<td>W29</td>
+<td>W17</td>
+<td>W19</td>
+<td style='background:lightgray;'>W13*</td>
+<td>W21</td>
+<td>W15</td>
+<td>W23</td>
+<td style='background:lightgray;'>W13</td>
+</tr>
+
+<tr>
+<td>R14</td>
+<td>W14</td>
+<td>W30</td>
+<td>W16</td>
+<td>W18</td>
+<td style='background:lightgray;'>W14*</td>
+<td>W20</td>
+<td style='background:lightgray;'>W14</td>
+<td>W22</td>
+<td style='background:lightgray;'>W14</td>
+</tr>
+
+<tr>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td>ELR_EL2</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>R15</td>
+<td>PC</td>
+<td colspan='8' style='background:lightgray;'>PC</td>
+</tr>
+
+<tr>
+<td>SPSR</td>
+<td style='background:gray;'></td>
+<td style='background:lightgray;'>SPSR_FIQ</td>
+<td style='background:lightgray;'>SPSR_IRQ</td>
+<td>SPSR_EL1</td>
+<td>SPSR_EL3</td>
+<td style='background:lightgray;'>SPSR_ABT</td>
+<td>SPSR_EL2</td>
+<td style='background:lightgray;'>SPSR_UND</td>
+<td style='background:gray;'></td>
+</tr>
+
+</table>
+
+<h1>Execution states</h1>
+
+<table align='center' border='1'>
+<tr>
+<td rowspan='2'>AArch32 mode</td>
+<td rowspan='2'>Privilege level</td>
+<td rowspan='2'>Secure mode</td>
+<td colspan='2'>AArch64 exception level</td>
+</tr>
+
+<tr>
+<td>32-bit EL3 available</td>
+<td>Only 64-bit EL3</td>
+</tr>
+
+<tr>
+<td rowspan='2'>USR</td>
+<td rowspan='2'>PL0</td>
+<td>S</td>
+<td rowspan='2' colspan='2'>EL0</td>
+</tr>
+
+<tr>
+<td>N</td>
+</tr>
+
+<tr>
+<td rowspan='2'>SVC<br>ABD<br>UND<br>FIQ<br>IRQ<br>SYS</td>
+<td rowspan='2'>PL1</td>
+<td>S</td>
+<td colspan='2'>EL1</td>
+</tr>
+
+<tr>
+<td>N</td>
+<td>EL3</td>
+<td>EL1</td>
+</tr>
+
+<tr>
+<td>HYP</td>
+<td>PL2</td>
+<td>N</td>
+<td colspan='2'>EL2</td>
+</tr>
+
+<tr>
+<td>MON</td>
+<td>PL1</td>
+<td>S</td>
+<td>EL3</td>
+<td>EL1</td>
+</tr>
+</table>
+
+<h1>Floating point and vector registers</h1>
+
+<table align='center' border='1'>
+<tr>
+<td width='36'>127<br>&hellip;<br>96</td>
+<td width='36'>95<br>&hellip;<br>64</td>
+<td width='36'>63<br>&hellip;<br>32</td>
+<td width='36'>31<br>&hellip;<br>0</td>
+<td width='36'>127<br>&hellip;<br>96</td>
+<td width='36'>95<br>&hellip;<br>64</td>
+<td width='36'>63<br>&hellip;<br>32</td>
+<td width='36'>31<br>&hellip;<br>0</td>
+<td></td>
+</tr>
+
+<tr>
+<td colspan='4'><b>AArch32</b></td>
+<td colspan='5'><b>AArch64</b></td>
+</tr>
+
+<tr>
+<td colspan='4'>Q0</td>
+<td colspan='4'>Q0</td>
+<td rowspan='3'>V0</td>
+</tr>
+
+<tr>
+<td colspan='2'>D1</td>
+<td colspan='2'>D0</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D0</td>
+</tr>
+
+<tr>
+<td>S3</td>
+<td>S2</td>
+<td>S1</td>
+<td>S0</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S0</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q1</td>
+<td colspan='4'>Q1</td>
+<td rowspan='3'>V1</td>
+</tr>
+
+<tr>
+<td colspan='2'>D3</td>
+<td colspan='2'>D2</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D1</td>
+</tr>
+
+<tr>
+<td>S7</td>
+<td>S6</td>
+<td>S5</td>
+<td>S4</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S1</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q2</td>
+<td colspan='4'>Q2</td>
+<td rowspan='3'>V2</td>
+</tr>
+
+<tr>
+<td colspan='2'>D5</td>
+<td colspan='2'>D4</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D2</td>
+</tr>
+
+<tr>
+<td>S11</td>
+<td>S10</td>
+<td>S9</td>
+<td>S8</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S2</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q3</td>
+<td colspan='4'>Q3</td>
+<td rowspan='3'>V3</td>
+</tr>
+
+<tr>
+<td colspan='2'>D7</td>
+<td colspan='2'>D6</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D3</td>
+</tr>
+
+<tr>
+<td>S15</td>
+<td>S14</td>
+<td>S13</td>
+<td>S12</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S3</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q4</td>
+<td colspan='4'>Q4</td>
+<td rowspan='3'>V4</td>
+</tr>
+
+<tr>
+<td colspan='2'>D9</td>
+<td colspan='2'>D8</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D4</td>
+</tr>
+
+<tr>
+<td>S19</td>
+<td>S18</td>
+<td>S17</td>
+<td>S16</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S4</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q5</td>
+<td colspan='4'>Q5</td>
+<td rowspan='3'>V5</td>
+</tr>
+
+<tr>
+<td colspan='2'>D11</td>
+<td colspan='2'>D10</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D5</td>
+</tr>
+
+<tr>
+<td>S23</td>
+<td>S22</td>
+<td>S21</td>
+<td>S20</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S5</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q6</td>
+<td colspan='4'>Q6</td>
+<td rowspan='3'>V6</td>
+</tr>
+
+<tr>
+<td colspan='2'>D13</td>
+<td colspan='2'>D12</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D6</td>
+</tr>
+
+<tr>
+<td>S27</td>
+<td>S26</td>
+<td>S25</td>
+<td>S24</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S6</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q7</td>
+<td colspan='4'>Q7</td>
+<td rowspan='3'>V7</td>
+</tr>
+
+<tr>
+<td colspan='2'>D15</td>
+<td colspan='2'>D14</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D7</td>
+</tr>
+
+<tr>
+<td>S31</td>
+<td>S30</td>
+<td>S29</td>
+<td>S28</td>
+<td colspan='3' style='background:gray;'></td>
+<td>S7</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q8</td>
+<td colspan='4'>Q8</td>
+<td rowspan='3'>V8</td>
+</tr>
+
+<tr>
+<td colspan='2'>D17</td>
+<td colspan='2'>D16</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D8</td>
+</tr>
+
+<tr>
+<td colspan='4' style='background:gray;'></td>
+<td colspan='3' style='background:gray;'></td>
+<td>S7</td>
+</tr>
+
+<tr>
+<td colspan='9'>&vellip;</td>
+</tr>
+
+<tr>
+<td colspan='4'>Q15</td>
+<td colspan='4'>Q15</td>
+<td rowspan='3'>V15</td>
+</tr>
+
+<tr>
+<td colspan='2'>D31</td>
+<td colspan='2'>D30</td>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D15</td>
+</tr>
+
+<tr>
+<td colspan='4' style='background:gray;'></td>
+<td colspan='3' style='background:gray;'></td>
+<td>S15</td>
+</tr>
+
+<tr>
+<td rowspan='3' colspan='4' style='background:gray;'></td>
+<td colspan='4'>Q16</td>
+<td rowspan='3'>V16</td>
+</tr>
+
+<tr>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D16</td>
+</tr>
+
+<tr>
+<td colspan='3' style='background:gray;'></td>
+<td>S16</td>
+</tr>
+
+<tr>
+<td colspan='9'>&vellip;</td>
+</tr>
+
+<tr>
+<td rowspan='3' colspan='4' style='background:gray;'></td>
+<td colspan='4'>Q31</td>
+<td rowspan='3'>V31</td>
+</tr>
+
+<tr>
+<td colspan='2' style='background:gray;'></td>
+<td colspan='2'>D31</td>
+</tr>
+
+<tr>
+<td colspan='3' style='background:gray;'></td>
+<td>S31</td>
+</tr>
+</table>
+
+<h1>CPSR/SPSR layout</h1>
+
+<table align='center' border='1'>
+<tr>
+<td>Mode</td>
+<td width='18'>3<br>1</td>
+<td width='18'>3<br>0</td>
+<td width='18'>2<br>9</td>
+<td width='18'>2<br>8</td>
+<td width='18'>2<br>7</td>
+<td width='18'>2<br>6</td>
+<td width='18'>2<br>5</td>
+<td width='18'>2<br>4</td>
+<td width='18'>2<br>3</td>
+<td width='18'>2<br>2</td>
+<td width='18'>2<br>1</td>
+<td width='18'>2<br>0</td>
+<td width='18'>1<br>9</td>
+<td width='18'>1<br>8</td>
+<td width='18'>1<br>7</td>
+<td width='18'>1<br>6</td>
+<td width='18'>1<br>5</td>
+<td width='18'>1<br>4</td>
+<td width='18'>1<br>3</td>
+<td width='18'>1<br>2</td>
+<td width='18'>1<br>1</td>
+<td width='18'>1<br>0</td>
+<td width='18'>9</td>
+<td width='18'>8</td>
+<td width='18'>7</td>
+<td width='18'>6</td>
+<td width='18'>5</td>
+<td width='18'>4</td>
+<td width='18'>3</td>
+<td width='18'>2</td>
+<td width='18'>1</td>
+<td width='18'>0</td>
+</tr>
+
+<tr>
+<td>ARM26</td>
+<td rowspan='3'>N</td>
+<td rowspan='3'>Z</td>
+<td rowspan='3'>C</td>
+<td rowspan='3'>V</td>
+<td>I</td>
+<td>F</td>
+<td colspan='24'>PC</td>
+<td colspan='2'>M<sub>0:1</sub></td>
+</tr>
+
+<tr>
+<td>ARM32</td>
+<td>Q</td>
+<td colspan='2'>IT<sub>0:1</sub></td>
+<td>J</td>
+<td rowspan='2'>U<br>A<br>O</td>
+<td rowspan='2'>P<br>A<br>N</td>
+<td rowspan='2'>S<br>S</td>
+<td rowspan='2'>I<br>L</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6'>IT<sub>2:7</sub></td>
+<td>E</td>
+<td rowspan='2'>A</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>F</td>
+<td rowspan='2'>T</td>
+<td>M<br>4</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td colspan='4' style='background:gray;'>0</td>
+<td colspan='10' style='background:gray;'>0</td>
+<td>D</td>
+<td>M<br>4</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+</table>
+
+<h1>CPSR/SPSR evolution</h1>
+
+<table align='center' border='1'>
+<tr>
+<td>Version</td>
+<td>Mode</td>
+<td width='18'>3<br>1</td>
+<td width='18'>3<br>0</td>
+<td width='18'>2<br>9</td>
+<td width='18'>2<br>8</td>
+<td width='18'>2<br>7</td>
+<td width='18'>2<br>6</td>
+<td width='18'>2<br>5</td>
+<td width='18'>2<br>4</td>
+<td width='18'>2<br>3</td>
+<td width='18'>2<br>2</td>
+<td width='18'>2<br>1</td>
+<td width='18'>2<br>0</td>
+<td width='18'>1<br>9</td>
+<td width='18'>1<br>8</td>
+<td width='18'>1<br>7</td>
+<td width='18'>1<br>6</td>
+<td width='18'>1<br>5</td>
+<td width='18'>1<br>4</td>
+<td width='18'>1<br>3</td>
+<td width='18'>1<br>2</td>
+<td width='18'>1<br>1</td>
+<td width='18'>1<br>0</td>
+<td width='18'>9</td>
+<td width='18'>8</td>
+<td width='18'>7</td>
+<td width='18'>6</td>
+<td width='18'>5</td>
+<td width='18'>4</td>
+<td width='18'>3</td>
+<td width='18'>2</td>
+<td width='18'>1</td>
+<td width='18'>0</td>
+</tr>
+
+<tr>
+<td>ARMv1<br>ARMv2</td>
+<td>ARM26</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>I</td>
+<td>F</td>
+<td colspan='24'>PC</td>
+<td colspan='4'>M<sub>0:1</sub></td>
+</tr>
+
+<tr>
+<td rowspan='3'>ARMv3</td>
+<td>ARM26</td>
+<td rowspan='3'>N</td>
+<td rowspan='3'>Z</td>
+<td rowspan='3'>C</td>
+<td rowspan='3'>V</td>
+<td>I</td>
+<td>F</td>
+<td colspan='24'>PC</td>
+<td colspan='4'>M<sub>0:1</sub></td>
+</tr>
+
+<tr>
+<td>26 to 32</td>
+<td rowspan='2' colspan='20' style='background:gray;'>0</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>F</td>
+<td rowspan='2' style='background:gray;'>0</td>
+<td>0</td>
+<td rowspan='2' colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARM32</td>
+<td>1</td>
+</tr>
+
+<tr>
+<td>ARMv3G<br>ARMv4<br>ARMv5</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td colspan='20' style='background:gray;'>0</td>
+<td>I</td>
+<td>F</td>
+<td style='background:gray;'>0</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARMv4T<br>ARMv5T</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td colspan='20' style='background:gray;'>0</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARMv5TE<br>ARMv5TExP</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>Q</td>
+<td colspan='19' style='background:gray;'>0</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARMv5TEJ</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>Q</td>
+<td colspan='2' style='background:gray;'>0</td>
+<td>J</td>
+<td colspan='16' style='background:gray;'>0</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARMv6</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>Q</td>
+<td colspan='2' style='background:gray;'>0</td>
+<td>J</td>
+<td colspan='4' style='background:gray;'>0</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6' style='background:gray;'>0</td>
+<td>E</td>
+<td>A</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARMv6T2<br>ARMv7</td>
+<td>ARM32</td>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>Q</td>
+<td colspan='2'>IT<sub>0:1</sub></td>
+<td>J</td>
+<td colspan='4' style='background:gray;'>0</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6'>IT<sub>2:7</sub></td>
+<td>E</td>
+<td>A</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td style='background:gray;'>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td rowspan='2'>ARMv8</td>
+<td>ARM32</td>
+<td rowspan='2'>N</td>
+<td rowspan='2'>Z</td>
+<td rowspan='2'>C</td>
+<td rowspan='2'>V</td>
+<td>Q</td>
+<td colspan='2'>IT<sub>0:1</sub></td>
+<td>J</td>
+<td colspan='2' style='background:gray;'>0</td>
+<td rowspan='2'>S<br>S</td>
+<td rowspan='2'>I<br>L</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6'>IT<sub>2:7</sub></td>
+<td>E</td>
+<td rowspan='2'>A</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>F</td>
+<td rowspan='2'>T</td>
+<td>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td colspan='6' style='background:gray;'>0</td>
+<td colspan='10' style='background:gray;'>0</td>
+<td>D</td>
+<td>0</td>
+<td colspan='2'>M<sub>2:3</sub></td>
+<td style='background:gray;'>0</td>
+<td>M<br>0</td>
+</tr>
+
+<tr>
+<td rowspan='2'>ARMv8.1</td>
+<td>ARM32</td>
+<td rowspan='2'>N</td>
+<td rowspan='2'>Z</td>
+<td rowspan='2'>C</td>
+<td rowspan='2'>V</td>
+<td>Q</td>
+<td colspan='2'>IT<sub>0:1</sub></td>
+<td>J</td>
+<td style='background:gray;'>0</td>
+<td rowspan='2'>P<br>A<br>N</td>
+<td rowspan='2'>S<br>S</td>
+<td rowspan='2'>I<br>L</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6'>IT<sub>2:7</sub></td>
+<td>E</td>
+<td rowspan='2'>A</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>F</td>
+<td rowspan='2'>T</td>
+<td>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td colspan='5' style='background:gray;'>0</td>
+<td colspan='10' style='background:gray;'>0</td>
+<td>D</td>
+<td>0</td>
+<td colspan='2'>M<sub>2:3</sub></td>
+<td style='background:gray;'>0</td>
+<td>M<br>0</td>
+</tr>
+
+<tr>
+<td rowspan='2'>ARMv8.2</td>
+<td>ARM32</td>
+<td rowspan='2'>N</td>
+<td rowspan='2'>Z</td>
+<td rowspan='2'>C</td>
+<td rowspan='2'>V</td>
+<td>Q</td>
+<td colspan='2'>IT<sub>0:1</sub></td>
+<td>J</td>
+<td rowspan='2'>U<br>A<br>O</td>
+<td rowspan='2'>P<br>A<br>N</td>
+<td rowspan='2'>S<br>S</td>
+<td rowspan='2'>I<br>L</td>
+<td colspan='4'>GE<sub>0:3</sub></td>
+<td colspan='6'>IT<sub>2:7</sub></td>
+<td>E</td>
+<td rowspan='2'>A</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>F</td>
+<td rowspan='2'>T</td>
+<td>1</td>
+<td colspan='4'>M<sub>0:3</sub></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td colspan='4' style='background:gray;'>0</td>
+<td colspan='10' style='background:gray;'>0</td>
+<td>D</td>
+<td>0</td>
+<td colspan='2'>M<sub>2:3</sub></td>
+<td style='background:gray;'>0</td>
+<td>M<br>0</td>
+</tr>
+</table>
+
+<h1>Program counter</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td>Mode</td>
+<td width='144'>63 &hellip; 32</td>
+<td width='72'>31 &hellip; 26</td>
+<td width='144'>25 &hellip; 2</td>
+<td width='18'>1</td>
+<td width='18'>0</td>
+</tr>
+
+<tr>
+<td>ARM26</td>
+<td colspan='2' style='background:gray;'>0</td>
+<td></td>
+<td colspan='2' style='background:gray;'>0</td>
+</tr>
+
+<tr>
+<td>ARM32</td>
+<td style='background:gray;'>0</td>
+<td colspan='2'></td>
+<td colspan='2' style='background:gray;'>0</td>
+</tr>
+
+<tr>
+<td>Thumb<br>ThumbEE</td>
+<td style='background:gray;'>0</td>
+<td colspan='3'></td>
+<td style='background:gray;'>0</td>
+</tr>
+
+<tr>
+<td>Jazelle</td>
+<td style='background:gray;'>0</td>
+<td colspan='4'></td>
+</tr>
+
+<tr>
+<td>ARM64</td>
+<td colspan='3'></td>
+<td colspan='2' style='background:gray;'>0</td>
+</tr>
+
+</table>
+
+<h1>AArch32 interworking jumps</h1>
+
+<table align='center' border='1'>
+<tr>
+<td width='18'>3<br>1</td>
+<td width='18'>3<br>0</td>
+<td width='18'>2<br>9</td>
+<td width='18'>2<br>8</td>
+<td width='18'>2<br>7</td>
+<td width='18'>2<br>6</td>
+<td width='18'>2<br>5</td>
+<td width='18'>2<br>4</td>
+<td width='18'>2<br>3</td>
+<td width='18'>2<br>2</td>
+<td width='18'>2<br>1</td>
+<td width='18'>2<br>0</td>
+<td width='18'>1<br>9</td>
+<td width='18'>1<br>8</td>
+<td width='18'>1<br>7</td>
+<td width='18'>1<br>6</td>
+<td width='18'>1<br>5</td>
+<td width='18'>1<br>4</td>
+<td width='18'>1<br>3</td>
+<td width='18'>1<br>2</td>
+<td width='18'>1<br>1</td>
+<td width='18'>1<br>0</td>
+<td width='18'>9</td>
+<td width='18'>8</td>
+<td width='18'>7</td>
+<td width='18'>6</td>
+<td width='18'>5</td>
+<td width='18'>4</td>
+<td width='18'>3</td>
+<td width='18'>2</td>
+<td width='18'>1</td>
+<td width='18'>0</td>
+<td>Target mode</td>
+</tr>
+
+<tr>
+<td colspan='30'></td>
+<td>0</td>
+<td>0</td>
+<td>ARM32</td>
+</tr>
+
+<tr>
+<td colspan='31'></td>
+<td>1</td>
+<td>Thumb</td>
+</tr>
+</table>
+
+<h1>Alignment checks (AArch32)</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td>Versions</td>
+<td>SCTLR.U<br>bit 22<br>v6</td>
+<td>SCTLR.A<br>bit 1<br>v3+</td>
+<td>Name</td>
+<td>Behavior on unaligned access<br>(general)</td>
+</tr>
+
+<tr>
+<td>v1 &mdash; v2</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td rowspan='3'>Legacy</td>
+<td rowspan='3'>Rotate on 32-bit loads<br>Ignore lower bits</td>
+</tr>
+
+<tr>
+<td>v3 &mdash; v5</td>
+<td style='background:gray;'></td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>0</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>v3 &mdash; v5</td>
+<td style='background:gray;'></td>
+<td>1</td>
+<td rowspan='2'>Modulo 8 alignment checks</td>
+<td rowspan='2'>Alignment fault<br>LDRD/STRD must be 8-byte aligned</td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>0</td>
+<td>1</td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>1</td>
+<td>0</td>
+<td rowspan='2'>Unaligned</td>
+<td rowspan='2'>Unaligned access</td>
+</tr>
+
+<tr>
+<td>v7+</td>
+<td style='background:gray;'></td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>1</td>
+<td>1</td>
+<td rowspan='2'>Modulo 4 alignment checks</td>
+<td rowspan='2'>Alignment fault<br>LDRD/STRD must be 4-byte aligned</td>
+</tr>
+
+<tr>
+<td>v7+</td>
+<td style='background:gray;'></td>
+<td>1</td>
+</tr>
+
+</table>
+
+<h1>Behavior of instructions on unaligned access when A=0</h1>
+
+<table align='center' border='1'>
+<tr>
+<td>Instruction</td>
+<td>Mode</td>
+<td>Alignment</td>
+<td>ARMv5</td>
+<td>ARMv6<br>U=0</td>
+<td>ARMv6<br>U=1</td>
+<td>ARMv7</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDRH<br>LDRSH<br>STRH</tt></td>
+<td>2</td>
+<td>X</td>
+<td>X</td>
+<td>U</td>
+<td rowspan='2'>U</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDRHT<br>LDRSHT<br>STRHT<br>TBH</tt></td>
+<td>2</td>
+<td colspan='3' style='background:gray;'></td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDREXH<br>STREXH</tt></td>
+<td>2</td>
+<td colspan='3' style='background:gray;'></td>
+<td>A</td>
+</tr>
+
+<tr>
+<td><tt>LDR<br>LDRT</tt></td>
+<td>ARM</td>
+<td>4</td>
+<td>R</td>
+<td rowspan='2'>R</td>
+<td rowspan='2'>U</td>
+<td rowspan='3'>U</td>
+</tr>
+
+<tr>
+<td><tt>LDR</tt></td>
+<td rowspan='2'>Thumb</td>
+<td rowspan='2'>4</td>
+<td>X</td>
+</tr>
+
+<tr>
+<td><tt>LDRT</tt></td>
+<td colspan='3' style='background:gray;'></td>
+</tr>
+
+<tr>
+<td><tt>STR<br>STRT</tt></td>
+<td>ARM</td>
+<td>4</td>
+<td>I</td>
+<td rowspan='2'>I</td>
+<td rowspan='2'>U</td>
+<td rowspan='3'>U</td>
+</tr>
+
+<tr>
+<td><tt>STR</tt></td>
+<td rowspan='2'>Thumb</td>
+<td rowspan='2'>4</td>
+<td>X</td>
+</tr>
+
+<tr>
+<td><tt>STRT</tt></td>
+<td colspan='3' style='background:gray;'></td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDREX<br>STREX</tt></td>
+<td>4</td>
+<td style='background:gray;'></td>
+<td>X</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDM<br>STM<br>PUSH<br>POP</tt></td>
+<td>4</td>
+<td>I</td>
+<td>I</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDC<br>LDC2<br>STC<br>STC2</tt></td>
+<td>4</td>
+<td>I</td>
+<td>I</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>RFE<br>SRS</tt></td>
+<td>4</td>
+<td style='background:gray;'></td>
+<td>I</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDREX<br>STREX</tt></td>
+<td>4</td>
+<td style='background:gray;'></td>
+<td>X</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>SWP</tt></td>
+<td>4</td>
+<td>R/I</td>
+<td>R/I</td>
+<td>A</td>
+<td>A</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDRD<br>STRD</tt></td>
+<td>*</td>
+<td>X(8)</td>
+<td>X(8)</td>
+<td>A(4)</td>
+<td>A(4)</td>
+</tr>
+
+<tr>
+<td colspan='2'><tt>LDREXD<br>STREXD</tt></td>
+<td>8</td>
+<td colspan='3' style='background:gray;'></td>
+<td>A</td>
+</tr>
+
+</table>
+
+<p>Legend:</p>
+<ul>
+<li>X - unpredictable</li>
+<li>U - unaligned access</li>
+<li>A - alignment fault</li>
+<li>R - aligned word load, value rotated right by 8 times the lower 2 bits of the address</li>
+<li>I - ignore lower bits of address</li>
+<li>R/I - R on load, I on store</li>
+<li>The alignment requirement of the <tt>LDRD/STRD</tt> instructions depends on the version and mode, which is listed in the column after the symbol in parentheses</li>
+</ul>
+
+<h1>Byte order settings (AArch32)</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td>Versions</td>
+<td>SCTLR.B<br>bit 7<br>v3 &mdash; v6</td>
+<td>CPSR.E<br>bit 9<br>v6+</td>
+<td>Data<br>endianness</td>
+<td>Instruction<br>endianness</td>
+<td>Constraint</td>
+</tr>
+
+<tr>
+<td>v1 &mdash; v2</td>
+<td style='background:gray;'></td>
+<td style='background:gray;'></td>
+<td rowspan='4'>LE</td>
+<td rowspan='4'>LE</td>
+<td rowspan='4'></td>
+</tr>
+
+<tr>
+<td>v3 &mdash; v5</td>
+<td>0</td>
+<td style='background:gray;'></td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>0</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>v7</td>
+<td style='background:gray;'></td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>0</td>
+<td>1</td>
+<td rowspan='2'>LE</td>
+<td rowspan='2'>BE-8</td>
+<td>!(U = 0 &amp; A = 0)</td>
+</tr>
+
+<tr>
+<td>v7</td>
+<td style='background:gray;'></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>v3 &mdash; v5</td>
+<td>1</td>
+<td style='background:gray;'></td>
+<td rowspan='2'>BE-32</td>
+<td rowspan='2'>BE-32</td>
+<td></td>
+</tr>
+
+<tr>
+<td>v6</td>
+<td>1</td>
+<td>0</td>
+<td>!(U = 1 &amp; A = 0)</td>
+</tr>
+
+</table>
+
+<h1>Byte order and memory access</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td rowspan='2'>Address</tt></td>
+<td rowspan='2'>Actual value</tt></td>
+<td colspan='2'>Byte</tt></td>
+<td colspan='3'>Halfword</tt></td>
+<td colspan='3'>Word<br>(unaligned)</tt></td>
+<td colspan='2'>Word<br>(rotated)</tt></td>
+</tr>
+
+<tr>
+<td>LE<br>BE-8</td>
+<td>BE-32</td>
+<td>LE</td>
+<td>BE-8</td>
+<td>BE-32</td>
+<td>LE</td>
+<td>BE-8</td>
+<td><s>BE-32</s></td>
+<td>LE<br>BE-32</td>
+<td><s>BE-8</s></td>
+</tr>
+
+<tr>
+<td><tt>0</tt></td>
+<td><tt><span class='b1'>12</span></tt></td>
+<td><tt><span class='b1'>12</span></tt></td>
+<td><tt><span class='b4'>78</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b1'>12</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b2'>34</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b3'>56</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b3'>56</span><span class='b2'>34</span><span class='b1'>12</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b2'>34</span><span class='b3'>56</span><span class='b4'>78</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b3'>56</span><span class='b2'>34</span><span class='b1'>12</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b3'>56</span><span class='b2'>34</span><span class='b1'>12</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b2'>34</span><span class='b3'>56</span><span class='b4'>78</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>1</tt></td>
+<td><tt><span class='b2'>34</span></tt></td>
+<td><tt><span class='b2'>34</span></tt></td>
+<td><tt><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b2'>34</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b2'>34</span></tt></td>
+<td><tt><span class='b5'>9A</span><span class='b4'>78</span><span class='b3'>56</span><span class='b2'>34</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b3'>56</span><span class='b4'>78</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b2'>34</span><span class='b1'>12</span><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b4'>78</span><span class='b3'>56</span><span class='b2'>34</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b1'>12</span><span class='b2'>34</span><span class='b3'>56</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>2</tt></td>
+<td><tt><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span></tt></td>
+<td><tt><span class='b2'>34</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b4'>78</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b1'>12</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b5'>9A</span><span class='b4'>78</span><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b4'>78</span><span class='b5'>9A</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b1'>12</span><span class='b8'>F0</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b1'>12</span><span class='b4'>78</span><span class='b3'>56</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b4'>78</span><span class='b1'>12</span><span class='b2'>34</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>3</tt></td>
+<td><tt><span class='b4'>78</span></tt></td>
+<td><tt><span class='b4'>78</span></tt></td>
+<td><tt><span class='b1'>12</span></tt></td>
+<td><tt><span class='b5'>9A</span><span class='b4'>78</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span><span class='b4'>78</span></tt></td>
+<td><tt><span class='b4'>78</span><span class='b5'>9A</span><span class='b6'>BC</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b1'>12</span><span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b3'>56</span><span class='b2'>34</span><span class='b1'>12</span><span class='b4'>78</span></tt></td>
+<td><tt><span class='b2'>34</span><span class='b3'>56</span><span class='b4'>78</span><span class='b1'>12</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>4</tt></td>
+<td><tt><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b5'>9A</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b5'>9A</span><span class='b6'>BC</span><span class='b7'>DE</span><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span></tt></td>
+<td><tt><span class='b5'>9A</span><span class='b6'>BC</span><span class='b7'>DE</span><span class='b8'>F0</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>5</tt></td>
+<td><tt><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b6'>BC</span></tt></td>
+<td><tt>..<span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b7'>DE</span><span class='b8'>F0</span>..</tt></td>
+<td><tt><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span>..</tt></td>
+<td><tt><span class='b5'>9A</span><span class='b8'>F0</span><span class='b7'>DE</span><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b5'>9A</span><span class='b6'>BC</span><span class='b7'>DE</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>6</tt></td>
+<td><tt><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b6'>BC</span></tt></td>
+<td><tt><span class='b8'>F0</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b5'>9A</span></tt></td>
+<td><tt>....<span class='b8'>F0</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b8'>F0</span>....</tt></td>
+<td><tt><span class='b6'>BC</span><span class='b5'>9A</span>....</tt></td>
+<td><tt><span class='b6'>BC</span><span class='b5'>9A</span><span class='b8'>F0</span><span class='b7'>DE</span></tt></td>
+<td><tt><span class='b7'>DE</span><span class='b8'>F0</span><span class='b5'>9A</span><span class='b6'>BC</span></tt></td>
+</tr>
+
+<tr>
+<td><tt>7</tt></td>
+<td><tt><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b5'>9A</span></tt></td>
+<td><tt>..<span class='b8'>F0</span></tt></td>
+<td><tt><span class='b8'>F0</span>..</tt></td>
+<td><tt><span class='b5'>9A</span>..</tt></td>
+<td><tt>......<span class='b8'>F0</span></tt></td>
+<td><tt><span class='b8'>F0</span>......</tt></td>
+<td><tt><span class='b5'>9A</span>......</tt></td>
+<td><tt><span class='b7'>DE</span><span class='b6'>BC</span><span class='b5'>9A</span><span class='b8'>F0</span></tt></td>
+<td><tt><span class='b6'>BC</span><span class='b7'>DE</span><span class='b8'>F0</span><span class='b5'>9A</span></tt></td>
+</tr>
+
+</table>
+
+<h1>ARM calling convention register usage</h1>
+
+<h1>AArch32</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td rowspan='2' colspan='3'>Register names</td>
+<td rowspan='2'>Volatile<br>or<br>Preserved</td>
+<td colspan='2'>Notes</td>
+</tr>
+
+<tr>
+<td>In ARM and Thumb-2 modes</td>
+<td>In pre-Thumb-2 Thumb mode</td>
+</tr>
+
+<tr>
+<td colspan='6'><b>CPU</b></td>
+</tr>
+
+<tr class='v'>
+<td>r0</td>
+<td colspan='2'>a1</td>
+<td>V</td>
+<td colspan='2'>argument 1<br>result 1</td>
+</tr>
+
+<tr class='v'>
+<td>r1</td>
+<td colspan='2'>a2</td>
+<td>V</td>
+<td colspan='2'>argument 2<br>result 2</td>
+</tr>
+
+<tr class='v'>
+<td>r2</td>
+<td colspan='2'>a3</td>
+<td>V</td>
+<td colspan='2'>argument 3<br>result 3</td>
+</tr>
+
+<tr class='v'>
+<td>r3</td>
+<td colspan='2'>a4</td>
+<td>V</td>
+<td colspan='2'>argument 4<br>result 4</td>
+</tr>
+
+<tr class='p'>
+<td>r4</td>
+<td colspan='2'>v1</td>
+<td>P</td>
+<td colspan='2' rowspan='3'></td>
+</tr>
+
+<tr class='p'>
+<td>r5</td>
+<td colspan='2'>v2</td>
+<td>P</td>
+</tr>
+
+<tr class='p'>
+<td>r6</td>
+<td colspan='2'>v3</td>
+<td>P</td>
+</tr>
+
+<tr class='p'>
+<td>r7</td>
+<td>v4</td>
+<td>wr</td>
+<td>P</td>
+<td></td>
+<td>Work Register<br>pre-Thumb-2 Frame Pointer (not TPCS)</td>
+</tr>
+
+<tr class='p'>
+<td>r8</td>
+<td colspan='2'>v5</td>
+<td>P</td>
+<td></td>
+<td>not used in pre-Thumb-2</td>
+</tr>
+
+<tr class='p'>
+<td>r9</td>
+<td>v6</td>
+<td>sb<br>tr</td>
+<td>P</td>
+<td>Static Base<br>Thread Register</td>
+<td>not used in pre-Thumb-2</td>
+</tr>
+
+<tr class='p'>
+<td>r10</td>
+<td>v7</td>
+<td>sl</td>
+<td>P</td>
+<td colspan='2'>Stack Limit</td>
+</tr>
+
+<tr class='p'>
+<td>r11</td>
+<td>v8</td>
+<td>fp</td>
+<td>P</td>
+<td colspan='2'>Frame Pointer</td>
+</tr>
+
+<tr class='v'>
+<td>r12</td>
+<td colspan='2'>ip</td>
+<td>V</td>
+<td>Intra-Procedure-call scratch register</td>
+<td>not used in pre-Thumb-2</td>
+</tr>
+
+<tr class='p'>
+<td>r13</td>
+<td colspan='2'><b>sp</b></td>
+<td>P</td>
+<td colspan='2'><b>Stack Pointer</t></td>
+</tr>
+
+<tr class='v'>
+<td>r14</td>
+<td colspan='2'><b>lr</b></td>
+<td>V</td>
+<td colspan='2'><b>Link Register</t></td>
+</tr>
+
+<tr class='p'>
+<td>r15</td>
+<td colspan='2'><b>pc</b></td>
+<td>P</td>
+<td colspan='2'><b>Program Counter</t></td>
+</tr>
+
+<tr class='p'>
+<td rowspan='7' class='v'><b>cpsr</b></td>
+<td rowspan='2' colspan='2'>N, Z, C, V</td>
+<td>P</td>
+<td>For ARM26</td>
+<td>N/A</td>
+</tr>
+
+<tr class='v'>
+<td>V</td>
+<td colspan='2'>For ARM32</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>Q, GE</td>
+<td>V</td>
+<td rowspan='5' colspan='2'></td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>E</td>
+<td>P</td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>T, J</td>
+<td>P</td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>A, I, F, M</td>
+<td>P</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>IT</td>
+<td>V</td>
+</tr>
+
+<tr>
+<td colspan='6'><b>FPA</b></td>
+</tr>
+
+<tr class='v'>
+<td colspan='3'>f0</td>
+<td>V</td>
+<td>argument 1<br>result</td>
+<td rowspan='5'>not present in processors with Thumb</td>
+</tr>
+
+<tr class='v'>
+<td colspan='3'>f1</td>
+<td>V</td>
+<td>argument 2</td>
+</tr>
+
+<tr class='v'>
+<td colspan='3'>f2</td>
+<td>V</td>
+<td>argument 3</td>
+</tr>
+
+<tr class='v'>
+<td colspan='3'>f3</td>
+<td>V</td>
+<td>argument 4</td>
+</tr>
+
+<tr class='p'>
+<td colspan='3'>f4<br>f5<br>f6<br>f7</td>
+<td>P</td>
+<td></td>
+</tr>
+
+<tr>
+<td colspan='6'><b>VFP</b></td>
+</tr>
+
+<tr class='v'>
+<td>s0<br>&vellip;<br>s15</td>
+<td>d0<br>&vellip;<br>d7</td>
+<td>q0<br>&vellip;<br>q3</td>
+<td>V</td>
+<td>argument<br>result</td>
+<td rowspan='3'>not used in pre-Thumb-2</td>
+</tr>
+
+<tr class='p'>
+<td>s16<br>&vellip;<br>s31</td>
+<td>d8<br>&vellip;<br>d15</td>
+<td>q4<br>&vellip;<br>q7</td>
+<td>P</td>
+<td></td>
+</tr>
+
+<tr class='v'>
+<td style='background:gray;'></td>
+<td>d16<br>&vellip;<br>d31</td>
+<td>q8<br>&vellip;<br>q15</td>
+<td>V</td>
+<td></td>
+</tr>
+</table>
+
+<h1>AArch64</h1>
+
+<table align='center' border='1'>
+
+<tr>
+<td colspan='4'><b>CPU</b></td>
+</tr>
+
+<tr>
+<td colspan='2'>Register names</td>
+<td>Volatile<br>or<br>Preserved</td>
+<td>Notes</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x0</td>
+<td>V</td>
+<td>argument 1<br>result 1</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x1</td>
+<td>V</td>
+<td>argument 2<br>result 2</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x2</td>
+<td>V</td>
+<td>argument 3</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x3</td>
+<td>V</td>
+<td>argument 4</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x4</td>
+<td>V</td>
+<td>argument 5</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x5</td>
+<td>V</td>
+<td>argument 6</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x6</td>
+<td>V</td>
+<td>argument 7</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x7</td>
+<td>V</td>
+<td>argument 8</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x8</td>
+<td>V</td>
+<td>pointer for large return type</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x9<br>&vellip;<br>x15</td>
+<td>V</td>
+<td></td>
+</tr>
+
+<tr class='v'>
+<td>x16</td>
+<td>ip0</td>
+<td>V</td>
+<td rowspan='2'>Intra-Process-call register</td>
+</tr>
+
+<tr class='v'>
+<td>x17</td>
+<td>ip1</td>
+<td>V</td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>x18</td>
+<td>V</td>
+<td>Platform Register</td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>x19<br>&vellip;<br>x28</td>
+<td>P</td>
+<td></td>
+</tr>
+
+<tr class='p'>
+<td>x29</td>
+<td>fp</td>
+<td>P</td>
+<td>Frame Pointer</td>
+</tr>
+
+<tr class='v'>
+<td>x30</td>
+<td>lr</td>
+<td>V</td>
+<td><b>Link Register</b></td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>sp</td>
+<td>P</td>
+<td><b>Stack Pointer</b></td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>pc</td>
+<td>P</td>
+<td><b>Program Counter</b></td>
+</tr>
+
+<tr class='v'>
+<td><b>pstate</b></td>
+<td>N, Z, C, V</td>
+<td>V</td>
+<td></td>
+</tr>
+
+<tr>
+<td colspan='4'><b>SIMD</b></td>
+</tr>
+
+<tr class='v'>
+<td>v0<br>&vellip;<br>v7</td>
+<td>z0<br>&vellip;<br>z7</td>
+<td>V</td>
+<td>argument<br>result</td>
+</tr>
+
+<tr class='p'>
+<td>v8<br>&vellip;<br>v15</td>
+<td>z8<br>&vellip;<br>z15</td>
+<td>P</td>
+<td></td>
+</tr>
+
+<tr class='v'>
+<td>v16<br>&vellip;<br>v31</td>
+<td>z16<br>&vellip;<br>z31</td>
+<td>V</td>
+<td></td>
+</tr>
+
+<tr class='v'>
+<td colspan='2'>p0<br>&vellip;<br>p3</td>
+<td>V</td>
+<td>argument<br>result</td>
+</tr>
+
+<tr class='p'>
+<td colspan='2'>p4<br>&vellip;<br>p15</td>
+<td>P</td>
+<td></td>
+</tr>
+
+</table>
+
+</body>
+</html>
