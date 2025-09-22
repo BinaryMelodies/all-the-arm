@@ -1234,7 +1234,27 @@ int main(int argc, char * argv[], char * envp[])
 				}
 				break;
 			case ARM_EMU_UNDEFINED:
-				printf("UNDEFINED\n");
+				switch(arm_get_current_instruction_set(cpu))
+				{
+				case ISA_JAZELLE:
+					// this should never happen, Jazelle undefined instructions go through a handler table
+					assert(false);
+				case ISA_THUMB32:
+				case ISA_THUMBEE:
+					{
+						uint16_t opcode = arm_fetch16(cpu, cpu->r[PC] - 2);
+						printf("UNDEFINED 0x%04X\n", opcode);
+					}
+					break;
+				case ISA_AARCH26:
+				case ISA_AARCH32:
+				case ISA_AARCH64:
+					{
+						uint32_t opcode = arm_fetch32(cpu, cpu->r[PC] - 4);
+						printf("UNDEFINED 0x%08X\n", opcode);
+					}
+					break;
+				}
 				exit(0);
 			case ARM_EMU_PREFETCH_ABORT:
 				printf("PREFETCH ABORT\n");
@@ -1279,7 +1299,8 @@ int main(int argc, char * argv[], char * envp[])
 			case ARM_EMU_JAZELLE_UNDEFINED:
 				if(!j32_simulate_instruction(cpu, env->heap_start))
 				{
-					printf("UNDEFINED (Jazelle)\n");
+					uint8_t opcode = arm_fetch8(cpu, cpu->r[PC] - 1);
+					printf("UNDEFINED (Jazelle) %02X\n", opcode);
 					exit(0);
 				}
 				break;

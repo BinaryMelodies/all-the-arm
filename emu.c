@@ -2402,7 +2402,7 @@ _Noreturn void arm_undefined(arm_state_t * cpu)
 
 	if(cpu->capture_breaks)
 	{
-		arm_break_emulation(cpu, ARM_EMU_SVC);
+		arm_break_emulation(cpu, ARM_EMU_UNDEFINED);
 	}
 	else if(a64_el_uses_aarch64(cpu, 1))
 	{
