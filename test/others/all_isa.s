@@ -1,4 +1,6 @@
 
+@ Tests out switching between instruction sets (ARM32, Thumb, ThumbEE and Jazelle with extensions)
+
 @ must be loaded at 0x8000
 @ run with -v7+javaext
 	.global	_start

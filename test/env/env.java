@@ -1,12 +1,16 @@
 
+/* Tests the command line arguments and the environment variables */
+
 package env;
 
 import abi.Linux;
 
 public class env {
 	public static void main(String args[]) {
+		// include the native library
 		System.load(System.getProperty("user.dir") + "/syscall.so");
 
+		// convert arguments and environment variable to a format suitable for the low-level interface
 		byte[][] argv = new byte[args.length + 1][];
 
 		// quick and dirty argv[0] generator
@@ -16,8 +20,8 @@ public class env {
 			current_class_name = current_class_name.substring(0, dollar_separator);
 		argv[0] = (current_class_name.replace('.', '/') + ".class").getBytes();
 
-		for(int i = 1; i < args.length; i++)
-			argv[i] = args[i].getBytes();
+		for(int i = 0; i < args.length; i++)
+			argv[i + 1] = args[i].getBytes();
 		java.util.Map<String, String> env = java.lang.System.getenv();
 
 		byte[][] envp = new byte[env.size() + 1][];
@@ -29,6 +33,7 @@ public class env {
 		}
 		envp[index] = null;
 
+		// transfer to low-level interface
 		_start(argv, envp);
 	}
 

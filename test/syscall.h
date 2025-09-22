@@ -4,6 +4,21 @@
 asm(
 	".global\t_start\n"
 	"_start:\n"
+#if !ABI_IGNORE_ARGC_ARGV_ENVP
+# if __arm__ || __thumb__
+	"\tldr\tr0, [sp]\n"
+	"\tadd\tr1, sp, #4\n"
+	"\tadd\tr2, r1, r0, lsl #2\n"
+	"\tadd\tr2, r2, #4\n"
+# elif __aarch64__
+	"\tldr\tx0, [sp]\n"
+	"\tadd\tx1, sp, #8\n"
+	"\tadd\tx2, x1, x0, lsl #3\n"
+	"\tadd\tx2, x2, #8\n"
+# else
+#  error
+# endif
+#endif
 	"\tbl\tmain\n"
 	"\tbl\texit"
 );

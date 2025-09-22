@@ -1,3 +1,5 @@
+; Test hexadecimal output
+
 .class public others/puthex
 .super java/lang/Object
 

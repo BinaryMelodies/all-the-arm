@@ -1,5 +1,8 @@
 
+/* Tests if decimal output works, using division by 10 - GCC should optimize it so that no actual division is required */
+
 #include <stddef.h>
+#define ABI_IGNORE_ARGC_ARGV_ENVP 1
 #include "syscall.h"
 
 void putdec_u(size_t value)

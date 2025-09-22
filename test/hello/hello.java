@@ -1,11 +1,16 @@
 
+/* Simple Hello, World test */
+
 package hello;
 
 import abi.Linux;
 
 public class hello {
 	public static void main(String[] args) {
+		// include the native library
 		System.load(System.getProperty("user.dir") + "/syscall.so");
+
+		// transfer to low-level interface
 		_start();
 	}
 

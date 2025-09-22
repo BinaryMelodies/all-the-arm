@@ -1,4 +1,7 @@
 
+/* Simple Hello, World test */
+
+#define ABI_IGNORE_ARGC_ARGV_ENVP 1
 #include "syscall.h"
 
 int main(void)

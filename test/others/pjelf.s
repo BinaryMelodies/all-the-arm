@@ -1,4 +1,6 @@
 
+# Tests out picoJava binary, but using the extended SWI software interrupt for a fictional Linux ABI
+
 	.global	_start
 _start:
 	sipush	1
@@ -6,6 +8,7 @@ _start:
 	sethi	%hi16 message
 	sipush	message_length
 	sipush	4
+	# SWI
 	.byte	0xFE, 0x01
 
 	sipush	123

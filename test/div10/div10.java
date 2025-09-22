@@ -1,18 +1,22 @@
 
+/* Tests if decimal output works, using division by 10 */
+
 package div10;
 
 import abi.Linux;
 
 public class div10 {
 	public static void main(String args[]) {
+		// include the native library
 		System.load(System.getProperty("user.dir") + "/syscall.so");
+
+		// transfer to low-level interface
 		_start();
 	}
 
 	static void _start() {
 		Linux.exit(main());
 	}
-
 
 	static void putdec_u(int value) {
 		int current_brk_value = Linux.brk(-1);

@@ -1,4 +1,6 @@
 
+@ Test hexadecimal output
+
 	.text
 	.global	_start
 	.syntax	unified
