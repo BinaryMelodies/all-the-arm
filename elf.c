@@ -433,7 +433,6 @@ void read_elf_file(FILE * input_file, environment_t * env)
 
 	// if the instruction set is unknown/changes throughout the code (32-bit and not specified at launch time), we need to collect them
 	bool follow_mapping_symbols = env->isa == ISA_UNKNOWN;
-	init_isa(&env->config, &env->isa, &env->syntax, env->thumb2, force32bit);
 
 	struct mapping
 	{
@@ -497,6 +496,22 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									buffer = fread_asciz(input_file);
 									if(env->purpose == PURPOSE_PARSE)
 										printf("CPU name: \"%s\"\n", buffer);
+									if(strcmp(buffer, "1") == 0)
+										env->config.version = MAX(env->config.version, ARMV1);
+									if(strcmp(buffer, "2") == 0)
+										env->config.version = MAX(env->config.version, ARMV2);
+									if(strcmp(buffer, "2a") == 0)
+									{
+										env->config.version = MAX(env->config.version, ARMV2);
+										env->config.features |= 1 << FEATURE_SWP;
+									}
+									if(strcmp(buffer, "3") == 0 || strcmp(buffer, "3G") == 0)
+										env->config.version = MAX(env->config.version, ARMV3);
+									if(strcmp(buffer, "3M") == 0)
+									{
+										env->config.version = MAX(env->config.version, ARMV3);
+										env->config.features |= 1 << FEATURE_MULL;
+									}
 									free(buffer);
 									break;
 								case Tag_CPU_arch:
@@ -512,90 +527,147 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									case 1:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv4\n");
+										env->config.version = MAX(env->config.version, ARMV4);
 										break;
 									case 2:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv4T\n");
+										env->config.version = MAX(env->config.version, ARMV4);
+										env->config.features |= 1 << FEATURE_THUMB;
 										break;
 									case 3:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv5T\n");
+										env->config.version = MAX(env->config.version, ARMV5);
+										env->config.features |= 1 << FEATURE_THUMB;
 										break;
 									case 4:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv5TE\n");
+										env->config.version = MAX(env->config.version, ARMV5);
+										env->config.features |= (1 << FEATURE_THUMB) | (1 << FEATURE_ENH_DSP) | (1 << FEATURE_DSP_PAIR);
 										break;
 									case 5:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv5TEJ\n");
+										env->config.version = MAX(env->config.version, ARMV5);
+										env->config.features |= (1 << FEATURE_THUMB) | (1 << FEATURE_ENH_DSP) | (1 << FEATURE_DSP_PAIR) | (1 << FEATURE_JAZELLE);
 										break;
 									case 6:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6\n");
+										env->config.version = MAX(env->config.version, ARMV6);
 										break;
 									case 7:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6KZ\n");
+										env->config.version = MAX(env->config.version, ARMV6);
+										env->config.features |= (1 << FEATURE_MULTIPROC) | (1 << FEATURE_SECURITY);
 										break;
 									case 8:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6T2\n");
+										env->config.version = MAX(env->config.version, ARMV6);
+										env->config.features |= 1 << FEATURE_THUMB2;
 										break;
 									case 9:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6K\n");
+										env->config.version = MAX(env->config.version, ARMV6);
+										env->config.features |= 1 << FEATURE_MULTIPROC;
 										break;
 									case 10:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv7\n");
+										env->config.version = MAX(env->config.version, ARMV7);
 										break;
 									case 11:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6-M\n");
+										env->config.version = MAX(env->config.version, ARMV6);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 12:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv6S-M\n");
+										env->config.version = MAX(env->config.version, ARMV6);
+										env->config.features |= 1 << FEATURE_SECURITY;
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 13:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv7E-M\n");
+										env->config.version = MAX(env->config.version, ARMV7);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 14:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8-A\n");
+										env->config.version = MAX(env->config.version, ARMV8);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									case 15:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8-R\n");
+										env->config.version = MAX(env->config.version, ARMV8);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_R;
 										break;
 									case 16:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8-M.baseline\n");
+										env->config.version = MAX(env->config.version, ARMV8);
+										env->config.features |= 1 << FEATURE_M_BASE;
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 17:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8-M.mainline\n");
+										env->config.version = MAX(env->config.version, ARMV8);
+										env->config.features |= 1 << FEATURE_M_MAIN;
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 18:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8.1-A\n");
+										env->config.version = MAX(env->config.version, ARMV81);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									case 19:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8.2-A\n");
+										env->config.version = MAX(env->config.version, ARMV82);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									case 20:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8.3-A\n");
+										env->config.version = MAX(env->config.version, ARMV83);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									case 21:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv8.1-M.mainline\n");
+										env->config.version = MAX(env->config.version, ARMV81);
+										env->config.features |= 1 << FEATURE_M_MAIN;
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 22:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("ARMv9-A\n");
+										env->config.version = MAX(env->config.version, ARMV9);
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -616,18 +688,26 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									case 'A':
 										if(env->purpose == PURPOSE_PARSE)
 											printf("Application\n");
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_A;
 										break;
 									case 'R':
 										if(env->purpose == PURPOSE_PARSE)
 											printf("Real-time\n");
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_R;
 										break;
 									case 'M':
 										if(env->purpose == PURPOSE_PARSE)
 											printf("Microcontroller\n");
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_M;
 										break;
 									case 'S':
 										if(env->purpose == PURPOSE_PARSE)
 											printf("Classic (application or real-time)\n");
+										if((env->config.features & FEATURE_PROFILE_MASK) == 0)
+											env->config.features |= ARM_PROFILE_C;
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -648,6 +728,7 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									case 1:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("yes\n");
+										//env->supported_isas |= 1 << ISA_AARCH32; // TODO
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -668,14 +749,20 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									case 1:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("16-bit Thumb only\n");
+										env->thumb2 = MAX(env->thumb2, THUMB2_PERMITTED);
+										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
 										break;
 									case 2:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("32-bit Thumb\n");
+										env->thumb2 = MAX(env->thumb2, THUMB2_EXPECTED);
+										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
 										break;
 									case 3:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("yes\n");
+										env->thumb2 = MAX(env->thumb2, THUMB2_PERMITTED);
+										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -685,7 +772,51 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_FP_arch:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Floating point architecture: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv1\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv2\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv3-D32\n");
+										break;
+									case 4:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv3-D16\n");
+										break;
+									case 5:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv4-D32\n");
+										break;
+									case 6:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv4-D16\n");
+										break;
+									case 7:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8, D0-D31\n");
+										break;
+									case 8:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8, D0-D15\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_WMMX_arch:
 									value = fread_uleb128(input_file);
@@ -693,7 +824,35 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_Advanced_SIMD_arch:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Advanced SIMD architecture: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Advanced SIMDv1\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Advanced SIMDv2\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8-A\n");
+										break;
+									case 4:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.1-A\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_PCS_config:
 									value = fread_uleb128(input_file);
@@ -701,7 +860,31 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_ABI_PCS_R9_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("R9 register usage: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("(V6) general purpose callee-save register\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("(SB) global static base\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("thread local storage\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("not used\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_ABI_PCS_RW_data:
 									value = fread_uleb128(input_file);
@@ -833,7 +1016,23 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_ABI_HardFP_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Hardware FP use: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("as determined by FP architecture\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("single precision only\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_ABI_VFP_use:
 									value = fread_uleb128(input_file);
@@ -863,35 +1062,187 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_FP_HP_extension:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Half-precision floating point: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("only those permitted by architecture\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv3/Advanced SIMDv1 optional extensions and those permitted by architecture\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.2-A optional extensions and those permitted by architecture\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_ABI_FP_16bit_format:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("FP16 format: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("not used\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("IEEE 754\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("VFPv3/Advanced SIMD alternative format\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_MPextension_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Multiprocessing: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("unspecified\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv7 extensions\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_DIV_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Division instruction: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("unspecified\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("not used\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("used\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_DSP_extension:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("DSP extensions: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("unspecified\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_MVE_arch:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("MVE architecture: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("integer\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("integer and floating-point\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_PAC_extension:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("PAC/AUT instructions: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes, in NOP-space\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes, in and outside NOP-space\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_BTI_extension:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("BTI instructions: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes, in NOP-space\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes, in and outside NOP-space\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_nodefaults:
 									value = fread_uleb128(input_file);
@@ -904,7 +1255,23 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_T2EE_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Thumb2EE ISA: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_conformance:
 									buffer = fread_asciz(input_file);
@@ -913,7 +1280,31 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									break;
 								case Tag_Virtualization_use:
 									value = fread_uleb128(input_file);
-									// TODO
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Virtualization: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("none\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("TrustZone\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Virtualization Extensions\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("TrustZone, Virtualization Extensions\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
 									break;
 								case Tag_FramePointer_use:
 									value = fread_uleb128(input_file);
@@ -943,6 +1334,8 @@ void read_elf_file(FILE * input_file, environment_t * env)
 			}
 		}
 	}
+
+	init_isa(&env->config, &env->isa, &env->syntax, env->thumb2, force32bit);
 
 	if(env->purpose == PURPOSE_PARSE && follow_mapping_symbols && shnum != 0)
 	{
