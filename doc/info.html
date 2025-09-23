@@ -31,7 +31,7 @@ h1 { text-align: center; }
 <td><b>Version</b></td>
 <td><b>Features</b></td>
 <td><b>Implementations</b></td>
-<td><b>FPU support</b></td>
+<td><b>FPU and SIMD support</b></td>
 </tr>
 
 <tr>
@@ -153,8 +153,8 @@ h1 { text-align: center; }
 
 <tr>
 <td>2004</td>
-<td>ARMv7-M</td>
-<td>only Thumb-2 mode</td>
+<td>ARMv7<br>ARMv7-M</td>
+<td>M-Profile<br>only Thumb-2 mode<br>no DSP instructions</td>
 <td>Cortex-M3</td>
 <td></td>
 </tr>
@@ -170,34 +170,103 @@ h1 { text-align: center; }
 <tr>
 <td>2005</td>
 <td>ARMv7-A</td>
-<td>ThumbEE mode<br>trivial Jazelle</td>
+<td>A-Profile<br>ThumbEE mode<br>trivial Jazelle<br>optional divide instruction</td>
 <td>Cortex-A8</td>
-<td>VFPv3<br>VFPv4</td>
+<td>VFPv3, Advanced SIMDv1<br>VFPv4, Advanced SIMDv2</td>
 </tr>
 
 <tr>
 <td>2007</td>
 <td>ARMv6-M</td>
 <td>only partial Thumb-2 mode</td>
+<td>Cortex-M1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2010</td>
+<td>ARMv7E-M</td>
+<td>DSP instructions</td>
+<td>Cortex-M4</td>
+<td>VFPv5</td>
+</tr>
+
+<tr>
+<td>2011</td>
+<td>ARMv7-R</td>
+<td>R-Profile<br>divide instruction</td>
+<td>Cortex-R7</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2012</td>
+<td>ARMv8<br>ARMv8-A</td>
+<td>64-bit mode<br>removed ThumbEE mode</td>
+<td>Cortex-A53</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2014</td>
+<td>(ARMv7E-M)</td>
+<td></td>
 <td>Cortex-M7</td>
 <td></td>
 </tr>
 
 <tr>
-<td>2011</td>
-<td>ARMv8</td>
-<td>64-bit mode<br>removed ThumbEE mode</td>
-<td>Cortex-A53</td>
-<td rowspan='2'>VFPv4</td>
+<td>2016</td>
+<td>ARMv8-R</td>
+<td>32-bit mode only<br>no ThumbEE</td>
+<td>Cortex-R52</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2016</td>
+<td>ARMv8-M</td>
+<td>Thumb-2 only<br>Only baseline instructions</td>
+<td>Cortex-M23</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2016</td>
+<td>(ARMv8-M)</td>
+<td>Thumb-2 only<br>Baseline and mainline instructions</td>
+<td>Cortex-M33</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2020</td>
+<td>ARMv8-R</td>
+<td>64-bit mode</td>
+<td>Cortex-R82</td>
+<td></td>
+</tr>
+
+<tr>
+<td>2020</td>
+<td>ARMv8.1-M</td>
+<td>M-Profile Vector Extensions</td>
+<td>Cortex-M55</td>
+<td>MVE</td>
 </tr>
 
 <tr>
 <td>2021</td>
-<td>ARMv9</td>
+<td>ARMv9<br>ARMv9-A</td>
 <td></td>
 <td>Cortex-A510<br>Cortex-A710<br>Cortex-X2</td>
+<td></td>
 </tr>
 </table>
+
+<p>Note that the year refers to the first appearance of the architecture, not the processor</p>
+
+<p>(Most of this information is based on Wikipedia as well as specific ARM manuals)</p>
 
 <h1>Feature grid for pre-ARMv7 processors</h1>
 
