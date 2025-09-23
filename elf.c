@@ -2,6 +2,7 @@
 /* Handling ELF binaries and emulating a very simple Linux environment */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -64,6 +65,41 @@ uint64_t freadword(FILE * file)
 	default:
 		assert(false);
 	}
+}
+
+uint64_t fread_uleb128(FILE * file)
+{
+	uint64_t value = 0;
+	for(size_t shift = 0; shift < 64; shift += 7)
+	{
+		uint8_t c = fgetc(file);
+		if(c == -1)
+			break;
+		value |= (c & 0x7F) << shift;
+		if(!(c & 0x80))
+			break;
+	}
+	return value;
+}
+
+char * fread_asciz(FILE * file)
+{
+	size_t buffer_length = 8;
+	char * buffer = malloc(buffer_length);
+	size_t buffer_pointer = 0;
+	int c;
+	while((c = fgetc(file)) != -1 && c != '\0')
+	{
+		if(buffer_pointer >= buffer_length)
+		{
+			buffer = realloc(buffer, buffer_length += 8);
+		}
+		buffer[buffer_pointer++] = c;
+	}
+	buffer[buffer_pointer++] = '\0';
+	if(buffer_pointer != buffer_length)
+		buffer = realloc(buffer, buffer_pointer);
+	return buffer;
 }
 
 uint64_t build_initial_stack(arm_state_t * cpu, uint64_t stack, int argc, char ** argv, char ** envp)
@@ -407,6 +443,506 @@ void read_elf_file(FILE * input_file, environment_t * env)
 
 	struct mapping * mapping_symbols = NULL;
 	uint32_t mapping_symbol_count = 0;
+
+	for(uint16_t i = 0; i < shnum; i++)
+	{
+		fseek(input_file, shoff + i * shentsize + 4, SEEK_SET);
+		uint32_t type = fread32(input_file);
+		if(type == SHT_ARM_ATTRIBUTES)
+		{
+			fseek(input_file, ei_class == ELFCLASS32 ? 8 : 16, SEEK_CUR);
+			uint64_t section_offset = freadword(input_file);
+			uint64_t section_end = section_offset + freadword(input_file);
+			fseek(input_file, section_offset, SEEK_SET);
+
+			if(fgetc(input_file) != 'A')
+				continue; // invalid version
+
+			while(ftell(input_file) < section_end)
+			{
+				uint64_t section_start = ftell(input_file);
+				uint32_t section_length = fread32(input_file);
+				if(
+					fgetc(input_file) == 'a'
+					&& fgetc(input_file) == 'e'
+					&& fgetc(input_file) == 'a'
+					&& fgetc(input_file) == 'b'
+					&& fgetc(input_file) == 'i'
+					&& fgetc(input_file) == '\0')
+				{
+					while(ftell(input_file) < section_start + section_length)
+					{
+						uint64_t tag_start = ftell(input_file);
+						uint8_t tag_type = fgetc(input_file);
+						uint32_t tag_size = fread32(input_file);
+						switch(tag_type)
+						{
+						case 1:
+							// file tag
+							while(ftell(input_file) < tag_start + tag_size)
+							{
+								char * buffer;
+								uint64_t value;
+
+								uint64_t tag_name = fread_uleb128(input_file);
+								switch(tag_name)
+								{
+								case Tag_CPU_raw_name:
+									buffer = fread_asciz(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("CPU raw name: \"%s\"\n", buffer);
+									free(buffer);
+									break;
+								case Tag_CPU_name:
+									buffer = fread_asciz(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("CPU name: \"%s\"\n", buffer);
+									free(buffer);
+									break;
+								case Tag_CPU_arch:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("CPU architecture: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("pre-ARMv4\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv4\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv4T\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv5T\n");
+										break;
+									case 4:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv5TE\n");
+										break;
+									case 5:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv5TEJ\n");
+										break;
+									case 6:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6\n");
+										break;
+									case 7:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6KZ\n");
+										break;
+									case 8:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6T2\n");
+										break;
+									case 9:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6K\n");
+										break;
+									case 10:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv7\n");
+										break;
+									case 11:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6-M\n");
+										break;
+									case 12:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv6S-M\n");
+										break;
+									case 13:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv7E-M\n");
+										break;
+									case 14:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8-A\n");
+										break;
+									case 15:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8-R\n");
+										break;
+									case 16:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8-M.baseline\n");
+										break;
+									case 17:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8-M.mainline\n");
+										break;
+									case 18:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.1-A\n");
+										break;
+									case 19:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.2-A\n");
+										break;
+									case 20:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.3-A\n");
+										break;
+									case 21:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv8.1-M.mainline\n");
+										break;
+									case 22:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("ARMv9-A\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("unknown: %"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_CPU_arch_profile:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("CPU profile: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("N/A\n");
+										break;
+									case 'A':
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Application\n");
+										break;
+									case 'R':
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Real-time\n");
+										break;
+									case 'M':
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Microcontroller\n");
+										break;
+									case 'S':
+										if(env->purpose == PURPOSE_PARSE)
+											printf("Classic (application or real-time)\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("unknown: %"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_ARM_ISA_use:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("ARM ISA: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_THUMB_ISA_use:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Thumb ISA: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("16-bit Thumb only\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("32-bit Thumb\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("yes\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_FP_arch:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_WMMX_arch:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_Advanced_SIMD_arch:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_PCS_config:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_PCS_R9_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_PCS_RW_data:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_PCS_RO_data:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_PCS_GOT_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_PCS_wchar_t:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("wchar_t: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("not allowed\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("16-bit\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("32-bit\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_ABI_FP_rounding:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_FP_denormal:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Denormals: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("may be flushed to +0\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("IEEE 754 behavior\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("may be flushed to 0, preserve sign\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_ABI_FP_exceptions:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Inexact results: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no check\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("IEEE 754 behavior\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_ABI_FP_user_exceptions:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_FP_number_model:
+									value = fread_uleb128(input_file);
+									if(env->purpose == PURPOSE_PARSE)
+										printf("Floating point: ");
+									switch(value)
+									{
+									case 0:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("no\n");
+										break;
+									case 1:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("normals\n");
+										break;
+									case 2:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("normals, infinity, quiet NaN\n");
+										break;
+									case 3:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("all IEEE 754\n");
+										break;
+									default:
+										if(env->purpose == PURPOSE_PARSE)
+											printf("%"PRId64"\n", value);
+										break;
+									}
+									break;
+								case Tag_ABI_align_needed:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_align_preserved:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_enum_size:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_HardFP_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_VFP_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_WMMX_args:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_optimization_goals:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_FP_optimization_goals:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_compatibility:
+									value = fread_uleb128(input_file);
+									buffer = fread_asciz(input_file);
+									free(buffer);
+									// TODO
+									break;
+								case Tag_CPU_unaligned_access:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_FP_HP_extension:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_ABI_FP_16bit_format:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_MPextension_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_DIV_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_DSP_extension:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_MVE_arch:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_PAC_extension:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_BTI_extension:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_nodefaults:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_also_compatible_with:
+									buffer = fread_asciz(input_file);
+									free(buffer);
+									// TODO
+									break;
+								case Tag_T2EE_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_conformance:
+									buffer = fread_asciz(input_file);
+									free(buffer);
+									// TODO
+									break;
+								case Tag_Virtualization_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_FramePointer_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_BTI_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								case Tag_PACRET_use:
+									value = fread_uleb128(input_file);
+									// TODO
+									break;
+								default:
+									fprintf(stderr, "Unable to parse rest of file tag: %"PRId64"\n", tag_name);
+									goto end_of_loop;
+								}
+								// TODO
+							}
+						end_of_loop:
+							break;
+						}
+						fseek(input_file, tag_start + tag_size, SEEK_SET);
+					}
+				}
+				fseek(input_file, section_start + section_length, SEEK_SET);
+			}
+		}
+	}
 
 	if(env->purpose == PURPOSE_PARSE && follow_mapping_symbols && shnum != 0)
 	{
