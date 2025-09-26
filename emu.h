@@ -502,10 +502,10 @@ uint16_t arm_fetch16(arm_state_t * cpu, uint64_t address);
 uint32_t arm_fetch32(arm_state_t * cpu, uint64_t address);
 uint16_t arm_fetch16be(arm_state_t * cpu, uint64_t address);
 
-//uint8_t  arm_memory_read8(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
-//uint16_t arm_memory_read16(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
-//uint32_t arm_memory_read32(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
-//uint64_t arm_memory_read64(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
+uint8_t  arm_memory_read8(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
+uint16_t arm_memory_read16(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
+uint32_t arm_memory_read32(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
+uint64_t arm_memory_read64(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian);
 
 void arm_memory_write8(const memory_interface_t * memory, uint64_t address, uint8_t value, arm_endianness_t endian);
 void arm_memory_write16(const memory_interface_t * memory, uint64_t address, uint16_t value, arm_endianness_t endian);

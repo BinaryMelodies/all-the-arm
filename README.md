@@ -194,6 +194,7 @@ To test the Jazelle mode, the emulator can parse Java classes and offers a minim
 To simplify the implementation, and avoid integrating a full JVM into the emulator, there are strict restrictions as to what the emulator can execute:
 
 * All methods must be static, and only static method calls are permitted. Loaded class files can contain instance methods but the emulator halts if a virtual call is attempted.
+* As a special exception, invokedynamic can be used to create function pointers to static methods using LambdaMetafactory. Such function pointers can be called via an interface call.
 * No objects can be instantiated, except for arrays.
 * Compile time String constants are also allowed, as long as the only operation done on them is getBytes().
 * No exception handling support is provided.

@@ -1,8 +1,8 @@
 
-all: all_isa puthex.a32 puthex.t32 puthex.a64 puthex.class test_clinit.class test_static.class test_string.class
+all: all_isa puthex.a32 puthex.t32 puthex.a64 puthex.class test_clinit.class test_static.class test_string.class test_indirect.class
 
 clean:
-	rm -f all_isa all_isa.o puthex.a32 puthex.a32.o puthex.t32 puthex.t32.o puthex.a64 puthex.a64.o puthex.class test_clinit.class test_static.class test_string.class
+	rm -f all_isa all_isa.o puthex.a32 puthex.a32.o puthex.t32 puthex.t32.o puthex.a64 puthex.a64.o puthex.class test_clinit.class test_static.class test_string.class test_indirect.class test_indirect\$$Call.class
 
 distclean: clean
 	rm -f *~

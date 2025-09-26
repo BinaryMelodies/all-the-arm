@@ -1089,6 +1089,13 @@ uint8_t a32_read8_user_mode(arm_state_t * cpu, uint32_t address)
 }
 
 // convenience function for emulation
+uint8_t arm_memory_read8(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian)
+{
+	uint8_t value;
+	memory_read8(memory, NULL, address, &value, endian, false);
+	return value;
+}
+
 uint8_t arm_memory_read8_data(arm_state_t * cpu, uint64_t address)
 {
 	uint8_t value;
@@ -1148,6 +1155,13 @@ uint16_t a32_read16_user_mode(arm_state_t * cpu, uint32_t address)
 }
 
 // convenience function for emulation
+uint16_t arm_memory_read16(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian)
+{
+	uint16_t value;
+	memory_read16(memory, NULL, address, &value, endian, false);
+	return value;
+}
+
 uint16_t arm_memory_read16_data(arm_state_t * cpu, uint64_t address)
 {
 	uint16_t value;
@@ -1207,6 +1221,13 @@ uint32_t a32_read32_user_mode(arm_state_t * cpu, uint32_t address)
 }
 
 // convenience function for emulation
+uint32_t arm_memory_read32(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian)
+{
+	uint32_t value;
+	memory_read32(memory, NULL, address, &value, endian, false);
+	return value;
+}
+
 uint32_t arm_memory_read32_data(arm_state_t * cpu, uint64_t address)
 {
 	uint32_t value;
@@ -1266,6 +1287,13 @@ uint64_t a32_read64_user_mode(arm_state_t * cpu, uint32_t address)
 }
 
 // convenience function for emulation
+uint64_t arm_memory_read64(const memory_interface_t * memory, uint64_t address, arm_endianness_t endian)
+{
+	uint64_t value;
+	memory_read64(memory, NULL, address, &value, endian, false);
+	return value;
+}
+
 uint64_t arm_memory_read64_data(arm_state_t * cpu, uint64_t address)
 {
 	uint64_t value;

@@ -26,6 +26,25 @@ typedef enum jvm_constant_type_t
 	CONSTANT_InvokeDynamic = 18,
 } jvm_constant_type_t;
 
+typedef enum jvm_reference_kind_t : uint8_t
+{
+	REF_getField = 1,
+	REF_getStatic = 2,
+	REF_putField = 3,
+	REF_putStatic = 4,
+	REF_invokeVirtual = 5,
+	REF_invokeStatic = 6,
+	REF_invokeSpecial = 7,
+	REF_newInvokeSpecial = 8,
+	REF_invokeInterface = 9,
+} jvm_reference_kind_t;
+
+typedef struct jvm_utf8_t
+{
+	uint16_t length;
+	char * bytes;
+} jvm_utf8_t;
+
 typedef struct jvm_constant_t
 {
 	jvm_constant_type_t type;
@@ -45,11 +64,21 @@ typedef struct jvm_constant_t
 			uint16_t name_index;
 			uint16_t type_index;
 		} name_and_type;
+		jvm_utf8_t utf8;
 		struct
 		{
-			uint16_t length;
-			char * bytes;
-		} utf8;
+			jvm_reference_kind_t kind;
+			uint16_t ref_index; // Fieldref, Methodref or InterfaceMethodref
+		} method_handle;
+		struct
+		{
+			uint16_t type_index;
+		} method_type;
+		struct
+		{
+			uint16_t bootstrap_method_index;
+			uint16_t name_and_type_index;
+		} invoke_dynamic;
 		uint64_t _long;
 		float64_t _double;
 	};

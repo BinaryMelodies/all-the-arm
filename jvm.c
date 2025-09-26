@@ -12,6 +12,48 @@
 
 jvm_constant_t * constant_pool;
 
+static inline uint32_t count_argument_bytes(jvm_utf8_t * utf8)
+{
+	uint32_t arg_bytes = 0;
+	for(int j = 1; j < utf8->length && utf8->bytes[j] != ')'; j++)
+	{
+		switch(utf8->bytes[j])
+		{
+		case 'B':
+		case 'C':
+		case 'F':
+		case 'I':
+		case 'S':
+		case 'Z':
+			arg_bytes += 4;
+			break;
+		case 'D':
+		case 'J':
+			arg_bytes += 8;
+			break;
+		case '[':
+			arg_bytes += 4;
+			j ++;
+			while(j < utf8->length && utf8->bytes[j] == '[')
+				j++;
+			if(j < utf8->length && utf8->bytes[j] == 'L')
+			{
+				j ++;
+				while(j < utf8->length && utf8->bytes[j] != ';')
+					j++;
+			}
+			break;
+		case 'L':
+			arg_bytes += 4;
+			j ++;
+			while(j < utf8->length && utf8->bytes[j] != ';')
+				j++;
+			break;
+		}
+	}
+	return arg_bytes;
+}
+
 #define CHECK_STR(__utf8, __strlit) ((__utf8).length == sizeof(__strlit) - 1 && memcmp((__utf8).bytes, (__strlit), sizeof(__strlit) - 1) == 0)
 #define CHECK_NAME_TYPE(__ref, __name, __type) (CHECK_STR(constant_pool[(__ref).name_index].utf8, __name) && CHECK_STR(constant_pool[(__ref).type_index].utf8, __type))
 
@@ -69,13 +111,15 @@ void read_class_file(FILE * input_file, environment_t * env)
 			constant_pool[i].fieldref.name_and_type_index = fread16be(input_file);
 			break;
 		case CONSTANT_MethodHandle:
-			fseek(input_file, 3L, SEEK_CUR);
+			constant_pool[i].method_handle.kind = fgetc(input_file);
+			constant_pool[i].method_handle.ref_index = fread16be(input_file);
 			break;
 		case CONSTANT_MethodType:
-			fseek(input_file, 2L, SEEK_CUR);
+			constant_pool[i].method_type.type_index = fread16be(input_file);
 			break;
 		case CONSTANT_InvokeDynamic:
-			fseek(input_file, 4L, SEEK_CUR);
+			constant_pool[i].invoke_dynamic.bootstrap_method_index = fread16be(input_file);
+			constant_pool[i].invoke_dynamic.name_and_type_index = fread16be(input_file);
 			break;
 		default:
 			fprintf(stderr, "Invalid constant pool entry\n");
@@ -273,43 +317,7 @@ void read_class_file(FILE * input_file, environment_t * env)
 					{
 						arm_memory_write32(env->memory_interface, address, env->cp_start, env->endian);
 
-						uint32_t arg_bytes = 0;
-						for(int j = 1; j < constant_pool[methods[i].type_index].utf8.length && constant_pool[methods[i].type_index].utf8.bytes[j] != ')'; j++)
-						{
-							switch(constant_pool[methods[i].type_index].utf8.bytes[j])
-							{
-							case 'B':
-							case 'C':
-							case 'F':
-							case 'I':
-							case 'S':
-							case 'Z':
-								arg_bytes += 4;
-								break;
-							case 'D':
-							case 'J':
-								arg_bytes += 8;
-								break;
-							case '[':
-								arg_bytes += 4;
-								j ++;
-								while(j < constant_pool[methods[i].type_index].utf8.length && constant_pool[methods[i].type_index].utf8.bytes[j] == '[')
-									j++;
-								if(j < constant_pool[methods[i].type_index].utf8.length && constant_pool[methods[i].type_index].utf8.bytes[j] == 'L')
-								{
-									j ++;
-									while(j < constant_pool[methods[i].type_index].utf8.length && constant_pool[methods[i].type_index].utf8.bytes[j] != ';')
-										j++;
-								}
-								break;
-							case 'L':
-								arg_bytes += 4;
-								j ++;
-								while(j < constant_pool[methods[i].type_index].utf8.length && constant_pool[methods[i].type_index].utf8.bytes[j] != ';')
-									j++;
-								break;
-							}
-						}
+						uint32_t arg_bytes = count_argument_bytes(&constant_pool[methods[i].type_index].utf8);
 
 						arm_memory_write32(env->memory_interface, address + 4, arg_bytes, env->endian);
 
@@ -338,6 +346,47 @@ void read_class_file(FILE * input_file, environment_t * env)
 				fseek(input_file, attribute_length, SEEK_CUR);
 			}
 		}
+	}
+
+	uint16_t attributes_count = fread16be(input_file);
+
+	struct jvm_bootstrap_method
+	{
+		// only store LambdaMetafactory.metafactory calls
+		uint16_t method_handle_index;
+	} * bootstrap_methods;
+
+	for(uint16_t j = 0; j < attributes_count; j++)
+	{
+		uint16_t name_index = fread16be(input_file);
+		uint32_t attribute_length = fread32be(input_file);
+		long attribute_start = ftell(input_file);
+		if(constant_pool[name_index].type == CONSTANT_Utf8 && CHECK_STR(constant_pool[name_index].utf8, "BootstrapMethods"))
+		{
+			uint16_t bootstrap_method_count = fread16be(input_file);
+			bootstrap_methods = malloc(sizeof(struct jvm_bootstrap_method) * bootstrap_method_count);
+
+			for(uint16_t k = 0; k < bootstrap_method_count; k++)
+			{
+				uint16_t bootstrap_method_ref = fread16be(input_file);
+				uint16_t bootstrap_args_count = fread16be(input_file);
+				if(
+					constant_pool[bootstrap_method_ref].method_handle.kind == REF_invokeStatic
+					&& CHECK_STR(constant_pool[constant_pool[constant_pool[constant_pool[bootstrap_method_ref].method_handle.ref_index].methodref.class_index]._class].utf8, "java/lang/invoke/LambdaMetafactory")
+					&& CHECK_NAME_TYPE(constant_pool[constant_pool[constant_pool[bootstrap_method_ref].method_handle.ref_index].methodref.name_and_type_index].name_and_type, "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;")
+					&& bootstrap_args_count == 3)
+				{
+					fread16be(input_file); // ignore
+					bootstrap_methods[k].method_handle_index = fread16be(input_file);
+				}
+				else
+				{
+					bootstrap_methods[k].method_handle_index = 0;
+					fseek(input_file, 2 * bootstrap_args_count, SEEK_CUR);
+				}
+			}
+		}
+		fseek(input_file, attribute_start + attribute_length, SEEK_SET);
 	}
 
 	for(uint16_t i = 1; i < constant_pool_count; i++)
@@ -398,6 +447,7 @@ void read_class_file(FILE * input_file, environment_t * env)
 					if(constant_pool[constant_pool[i].methodref.name_and_type_index].name_and_type.name_index == methods[j].name_index
 					&& constant_pool[constant_pool[i].methodref.name_and_type_index].name_and_type.type_index == methods[j].type_index)
 					{
+//						printf("Method %08X added to %08X\n", methods[j].address, env->cp_start + 4 * i);
 						arm_memory_write32(env->memory_interface, env->cp_start + 4 * i, methods[j].address, env->endian);
 						break;
 					}
@@ -449,9 +499,11 @@ void read_class_file(FILE * input_file, environment_t * env)
 			}
 			break;
 		case CONSTANT_InterfaceMethodref:
-			// ignore
-			//constant_pool[i].interfacemethodref.class_index = fread16be(input_file);
-			//constant_pool[i].interfacemethodref.name_and_type_index = fread16be(input_file);
+			{
+				// store the number of bytes that the arguments take up, so that we can readjust the stack
+				uint16_t arg_bytes = count_argument_bytes(&constant_pool[constant_pool[constant_pool[i].interfacemethodref.name_and_type_index].name_and_type.type_index].utf8);
+				arm_memory_write16(env->memory_interface, env->cp_start + 4 * i, arg_bytes, env->endian);
+			}
 			break;
 		case CONSTANT_NameAndType:
 			// ignore
@@ -460,6 +512,26 @@ void read_class_file(FILE * input_file, environment_t * env)
 			break;
 		default:
 			break;
+		}
+	}
+
+	// InvokeDynamics must be considered once all Methods are installed
+	for(uint16_t i = 1; i < constant_pool_count; i++)
+	{
+		if(constant_pool[i].type == CONSTANT_InvokeDynamic)
+		{
+			uint16_t method_handle_index = bootstrap_methods[constant_pool[i].invoke_dynamic.bootstrap_method_index].method_handle_index;
+			if(method_handle_index != 0)
+			{
+				uint16_t method_index = constant_pool[method_handle_index].method_handle.ref_index;
+				arm_memory_write32(env->memory_interface, env->cp_start + 4 * i,
+					arm_memory_read32(env->memory_interface, env->cp_start + 4 * method_index, env->endian),
+					env->endian);
+//				fprintf(stderr, "Installed reference %08X (via %08X) at address %08X\n",
+//					arm_memory_read32(env->memory_interface, env->cp_start + 4 * method_index, env->endian),
+//					env->cp_start + 4 * method_index,
+//					env->cp_start + 4 * i);
+			}
 		}
 	}
 
@@ -487,6 +559,120 @@ bool j32_simulate_instruction(arm_state_t * cpu, uint32_t heap_start)
 	j32_spill_fast_stack(cpu);
 	switch(arm_fetch8(cpu, cpu->r[PC]++))
 	{
+	case 0xAC:
+		// ireturn
+	case 0xAE:
+		// freturn
+	case 0xB0:
+		// areturn
+		{
+			int32_t result = j32_pop_word(cpu);
+
+			cpu->r[J32_TOS] = cpu->r[J32_LINK];
+			cpu->r[J32_LINK] = j32_pop_word(cpu);
+			cpu->r[J32_CP] = j32_pop_word(cpu);
+			uint32_t new_sp = cpu->r[J32_LOC];
+			cpu->r[J32_LOC] = j32_pop_word(cpu);
+			cpu->r[PC] = j32_pop_word(cpu);
+			cpu->r[J32_TOS] = new_sp;
+
+			j32_push_word(cpu, result);
+		}
+		break;
+	case 0xAD:
+		// lreturn
+	case 0xAF:
+		// dreturn
+		{
+			int64_t result = j32_pop_dword(cpu);
+
+			cpu->r[J32_TOS] = cpu->r[J32_LINK];
+			cpu->r[J32_LINK] = j32_pop_word(cpu);
+			cpu->r[J32_CP] = j32_pop_word(cpu);
+			uint32_t new_sp = cpu->r[J32_LOC];
+			cpu->r[J32_LOC] = j32_pop_word(cpu);
+			cpu->r[PC] = j32_pop_word(cpu);
+			cpu->r[J32_TOS] = new_sp;
+
+			j32_push_dword(cpu, result);
+		}
+		break;
+	case 0xB1:
+		// return
+		{
+			cpu->r[J32_TOS] = cpu->r[J32_LINK];
+			cpu->r[J32_LINK] = j32_pop_word(cpu);
+			cpu->r[J32_CP] = j32_pop_word(cpu);
+			uint32_t new_sp = cpu->r[J32_LOC];
+			cpu->r[J32_LOC] = j32_pop_word(cpu);
+			cpu->r[PC] = j32_pop_word(cpu);
+			cpu->r[J32_TOS] = new_sp;
+		}
+		break;
+
+	case 0xB2:
+		// getstatic
+		{
+			uint16_t index = arm_fetch16be(cpu, cpu->r[PC]);
+			uint32_t field_address = arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index);
+			switch(constant_pool[constant_pool[constant_pool[index].fieldref.name_and_type_index].name_and_type.type_index].utf8.bytes[0])
+			{
+			case 'B':
+				j32_push_word(cpu, sign_extend(1, arm_memory_read8_data(cpu, field_address)));
+				break;
+			case 'Z':
+				j32_push_word(cpu, arm_memory_read8_data(cpu, field_address));
+				break;
+			case 'C':
+				j32_push_word(cpu, arm_memory_read16_data(cpu, field_address));
+				break;
+			case 'S':
+				j32_push_word(cpu, sign_extend(2, arm_memory_read16_data(cpu, field_address)));
+				break;
+			case 'F':
+			case 'I':
+			case 'L':
+			case '[':
+				j32_push_word(cpu, arm_memory_read32_data(cpu, field_address));
+				break;
+			case 'D':
+			case 'J':
+				j32_push_dword(cpu, arm_memory_read64_data(cpu, field_address));
+				break;
+			}
+		}
+		cpu->r[PC] += 2;
+		break;
+
+	case 0xB3:
+		// putstatic
+		{
+			uint16_t index = arm_fetch16be(cpu, cpu->r[PC]);
+			uint32_t field_address = arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index);
+			switch(constant_pool[constant_pool[constant_pool[index].fieldref.name_and_type_index].name_and_type.type_index].utf8.bytes[0])
+			{
+			case 'B':
+			case 'Z':
+				arm_memory_write8_data(cpu, field_address, j32_pop_word(cpu));
+			case 'C':
+			case 'S':
+				arm_memory_write16_data(cpu, field_address, j32_pop_word(cpu));
+				break;
+			case 'F':
+			case 'I':
+			case 'L':
+			case '[':
+				arm_memory_write32_data(cpu, field_address, j32_pop_word(cpu));
+				break;
+			case 'D':
+			case 'J':
+				arm_memory_write64_data(cpu, field_address, j32_pop_dword(cpu));
+				break;
+			}
+		}
+		cpu->r[PC] += 2;
+		break;
+
 	case 0xB6:
 		// invokevirtual
 		{
@@ -568,117 +754,44 @@ bool j32_simulate_instruction(arm_state_t * cpu, uint32_t heap_start)
 			}
 		}
 		break;
-	case 0xAC:
-		// ireturn
-	case 0xAE:
-		// freturn
-	case 0xB0:
-		// areturn
-		{
-			int32_t result = j32_pop_word(cpu);
 
-			cpu->r[J32_TOS] = cpu->r[J32_LINK];
-			cpu->r[J32_LINK] = j32_pop_word(cpu);
-			cpu->r[J32_CP] = j32_pop_word(cpu);
-			uint32_t new_sp = cpu->r[J32_LOC];
-			cpu->r[J32_LOC] = j32_pop_word(cpu);
-			cpu->r[PC] = j32_pop_word(cpu);
-			cpu->r[J32_TOS] = new_sp;
-
-			j32_push_word(cpu, result);
-		}
-		break;
-	case 0xAD:
-		// lreturn
-	case 0xAF:
-		// dreturn
-		{
-			int64_t result = j32_pop_dword(cpu);
-
-			cpu->r[J32_TOS] = cpu->r[J32_LINK];
-			cpu->r[J32_LINK] = j32_pop_word(cpu);
-			cpu->r[J32_CP] = j32_pop_word(cpu);
-			uint32_t new_sp = cpu->r[J32_LOC];
-			cpu->r[J32_LOC] = j32_pop_word(cpu);
-			cpu->r[PC] = j32_pop_word(cpu);
-			cpu->r[J32_TOS] = new_sp;
-
-			j32_push_dword(cpu, result);
-		}
-		break;
-	case 0xB1:
-		// return
-		{
-			cpu->r[J32_TOS] = cpu->r[J32_LINK];
-			cpu->r[J32_LINK] = j32_pop_word(cpu);
-			cpu->r[J32_CP] = j32_pop_word(cpu);
-			uint32_t new_sp = cpu->r[J32_LOC];
-			cpu->r[J32_LOC] = j32_pop_word(cpu);
-			cpu->r[PC] = j32_pop_word(cpu);
-			cpu->r[J32_TOS] = new_sp;
-		}
-		break;
-	case 0xB2:
-		// getstatic
+	case 0xB9:
+		// invokeinterface
+		// we only simulate functional interfaces
 		{
 			uint16_t index = arm_fetch16be(cpu, cpu->r[PC]);
-			uint32_t field_address = arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index);
-			switch(constant_pool[constant_pool[constant_pool[index].fieldref.name_and_type_index].name_and_type.type_index].utf8.bytes[0])
+			uint16_t arg_bytes = arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index);
+			uint32_t method_address = arm_memory_read32_data(cpu, cpu->r[J32_TOS] - arg_bytes - 4);
+//			printf("Argument bytes: %d, TOS: %08lX\n", arg_bytes, cpu->r[J32_TOS]);
+//			printf("Move stack from %08lX via %08lX to %08lX\n",
+//				cpu->r[J32_TOS] - arg_bytes, cpu->r[J32_TOS] - arg_bytes, cpu->r[J32_TOS] - arg_bytes - 4);
+			for(uint16_t i = 0; i < arg_bytes; i++)
 			{
-			case 'B':
-				j32_push_word(cpu, sign_extend(1, arm_memory_read8_data(cpu, field_address)));
-				break;
-			case 'Z':
-				j32_push_word(cpu, arm_memory_read8_data(cpu, field_address));
-				break;
-			case 'C':
-				j32_push_word(cpu, arm_memory_read16_data(cpu, field_address));
-				break;
-			case 'S':
-				j32_push_word(cpu, sign_extend(2, arm_memory_read16_data(cpu, field_address)));
-				break;
-			case 'F':
-			case 'I':
-			case 'L':
-			case '[':
-				j32_push_word(cpu, arm_memory_read32_data(cpu, field_address));
-				break;
-			case 'D':
-			case 'J':
-				j32_push_dword(cpu, arm_memory_read64_data(cpu, field_address));
-				break;
+				arm_memory_write8_data(cpu, cpu->r[J32_TOS] - arg_bytes + i - 4,
+					arm_memory_read8_data(cpu, cpu->r[J32_TOS] - arg_bytes + i));
 			}
+			cpu->r[J32_TOS] -= 4;
+			cpu->r[PC] += 4;
+//			printf("Invoke interface %08X\n", method_address);
+
+			uint32_t new_cp_address = arm_memory_read32_data(cpu, method_address);
+			uint32_t argument_count = arm_memory_read32_data(cpu, method_address + 4);
+			uint32_t local_count = arm_memory_read32_data(cpu, method_address + 8);
+			j32_invoke(cpu, argument_count, local_count, method_address + 12);
+			cpu->r[J32_CP] = new_cp_address;
 		}
-		cpu->r[PC] += 2;
 		break;
-	case 0xB3:
-		// putstatic
+
+	case 0xBA:
+		// invokedynamic
+		// we only simulate LambdaMetafactory.metafactory calls, by pushing a method reference onto the stack
 		{
 			uint16_t index = arm_fetch16be(cpu, cpu->r[PC]);
-			uint32_t field_address = arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index);
-			switch(constant_pool[constant_pool[constant_pool[index].fieldref.name_and_type_index].name_and_type.type_index].utf8.bytes[0])
-			{
-			case 'B':
-			case 'Z':
-				arm_memory_write8_data(cpu, field_address, j32_pop_word(cpu));
-			case 'C':
-			case 'S':
-				arm_memory_write16_data(cpu, field_address, j32_pop_word(cpu));
-				break;
-			case 'F':
-			case 'I':
-			case 'L':
-			case '[':
-				arm_memory_write32_data(cpu, field_address, j32_pop_word(cpu));
-				break;
-			case 'D':
-			case 'J':
-				arm_memory_write64_data(cpu, field_address, j32_pop_dword(cpu));
-				break;
-			}
+			j32_push_word(cpu, arm_memory_read32_data(cpu, cpu->r[J32_CP] + 4 * index));
+			cpu->r[PC] += 4;
 		}
-		cpu->r[PC] += 2;
 		break;
+
 	case 0xBC:
 		// newarray
 		{
