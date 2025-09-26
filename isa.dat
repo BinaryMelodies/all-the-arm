@@ -12040,11 +12040,11 @@ usedby	extension
 begin
 	// ret_from_jazelle
 	j32_spill_fast_stack(cpu);
-	uint32_t value = j32_pop_word(cpu);
+	uint32_t address = j32_pop_word(cpu);
 	$lr = $pc_next;
 	//$cpsr.j = 0;
-	$cpsr.thumb = value & 1; // must be set first for proper alignment
-	$pc = value;
+	$cpsr.thumb = address & 1; // must be set first for proper alignment
+	$pc = address;
 end
 
 code	FE 01
@@ -12055,6 +12055,18 @@ begin
 	// swi
 	j32_spill_fast_stack(cpu);
 	arm_svc(cpu);
+end
+
+code	FE 02
+asm	jsr_indirect
+added	extension
+usedby	extension
+begin
+	// jsr_indirect
+	j32_spill_fast_stack(cpu);
+	uint32_t address = j32_pop_word(cpu);
+	j32_push_word(cpu, $pc_next);
+	$pc = address;
 end
 
 code	FF

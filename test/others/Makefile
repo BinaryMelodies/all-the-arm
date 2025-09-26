@@ -31,6 +31,11 @@ pjelf: pjelf.s
 	pj-elf-as $< -o $@.o
 	pj-elf-ld $@.o -o $@
 
+# Note: this requires GNU Binutils for picoJava
+test_indirect: test_indirect.s
+	pj-elf-as $< -o $@.o
+	pj-elf-ld $@.o -o $@
+
 %.class: %.java
 	javac --class-path .. $<
 
