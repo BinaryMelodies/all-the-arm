@@ -46,6 +46,7 @@ typedef enum arm_fp_version_t
 	ARM_VFPV3, // also SIMDv1, for v7 and later
 	ARM_VFPV4, // also SIMDv2, for v7 and later
 	ARM_VFPV5, // for 7VE-M and v8-R
+	ARM_V8FP,  // ARMv8 floating point
 } arm_fp_version_t;
 
 /*

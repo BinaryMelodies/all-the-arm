@@ -1006,13 +1006,13 @@ begin
 	}
 end
 
-#code	111001111111iiiiiiiiiiii1111iiii
-#asm	udf #{i:X}
-#added	4T
-#begin
-#	// udf
-#	arm_undefined(cpu);
-#end
+code	111001111111iiiiiiiiiiii1111iiii
+asm	udf #{i:X}
+added	4T
+begin
+	// permanently undefined udf
+	arm_undefined(cpu);
+end
 
 #### ARMv5
 
@@ -3290,7 +3290,7 @@ code	11011110iiiiiiii
 asm	udf #{i:X}
 added	4T
 begin
-	// udf
+	// permanently undefined udf
 	arm_undefined(cpu);
 end
 
@@ -5610,7 +5610,7 @@ code	111101111111iiii 1010iiiiiiiiiiii
 asm	udf #{i:X}
 added	6T2
 begin
-	// udf
+	// permanently undefined udf
 	arm_undefined(cpu);
 end
 
@@ -7723,12 +7723,13 @@ begin
 	}
 end
 
-code.a	111100110d10nnnndddd1101NQm0mmmm
-code.t	111111110d10nnnndddd1101NQm0mmmm
+code.a	111100110d1Snnnndddd1101NQm0mmmm
+code.t	111111110d1Snnnndddd1101NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vabd{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vabd{cond()}.f{S?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vabd
@@ -9833,6 +9834,108 @@ asm	vfm{o?s:a}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv2+sp
 begin
 	// vfma/vfms
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+######## ARMv8
+
+code.a	111100111d110000dddd00110Dm0mmmm
+code.t	111111111d110000dddd00110Dm0mmmm
+exclude	...................1............
+exclude	...............................1
+asm	aes{D?d:e}.8 q{d>>1}, q{m>>1}
+added	8
+begin
+	// aesd/aese
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100111d110000dddd00111Dm0mmmm
+code.t	111111111d110000dddd00111Dm0mmmm
+exclude	...................1............
+exclude	...............................1
+asm	aes{D?i:}mc.8 q{d>>1}, q{m>>1}
+added	8
+begin
+	// aemc/aesimc
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100100doonnnndddd1100N1m0mmmm
+code.t	111011110doonnnndddd1100N1m0mmmm
+exclude	...............1................
+exclude	...................1............
+exclude	...............................1
+asm	sha1{o?c;p;m;su0}.32 q{d>>1}, q{N'n>>1}, q{m>>1}
+added	8
+begin
+	// sha1c;sha1p;sha1m;sha1su0
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100111d111001dddd001011m0mmmm
+code.t	111111110d111001dddd001011m0mmmm
+exclude	...................1............
+exclude	...............................1
+asm	sha1h.32 q{d>>1}, q{m>>1}
+added	8
+begin
+	// sha1h
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100111d111010dddd001110m0mmmm
+code.t	111111111d111010dddd001110m0mmmm
+exclude	...................1............
+exclude	...............................1
+asm	sha1su1.32 q{d>>1}, q{m>>1}
+added	8
+begin
+	// sha1su1
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100110doonnnndddd1100N1m0mmmm
+code.t	111111110doonnnndddd1100N1m0mmmm
+exclude	..........11....................
+exclude	...................1............
+exclude	...............................1
+asm	sha256{o?h;h2;su1}.32 q{d>>1}, q{N'n>>1}, q{m>>1}
+added	8
+begin
+	// sha256h/sha256h2/sha256su1
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100111d111010dddd001111m0mmmm
+code.t	111111111d111010dddd001111m0mmmm
+exclude	...................1............
+exclude	...............................1
+asm	sha256su0.32 q{d>>1}, q{m>>1}
+added	8
+begin
+	// sha256su0
 	if(${cond()})
 	{
 		// TODO

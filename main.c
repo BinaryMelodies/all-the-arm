@@ -684,7 +684,7 @@ void init_isa(arm_configuration_t * cfg, arm_instruction_set_t * isa, arm_syntax
 		case ARMV82:
 		case ARMV83:
 		case ARMV9:
-			cfg->fp_version = ARM_VFPV4;
+			cfg->fp_version = ARM_V8FP;
 			break;
 		}
 	}

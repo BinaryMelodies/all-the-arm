@@ -11,8 +11,8 @@ current_isa = None
 is_begin_block = False
 
 VERSION_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '8.1', '8.2', '8.3']
-COPROC_VERSION_LIST = ['FPA', 'VFPv1', 'VFPv2', 'VFPv3', 'VFPv4', 'VFPv5']
-COPROC_VERSION_END = {'FPA': 'FPA', 'VFPv1': 'VFPv5', 'VFPv2': 'VFPv5', 'VFPv3': 'VFPv5', 'VFPv4': 'VFPv5', 'VFPv5': 'VFPv5'}
+COPROC_VERSION_LIST = ['FPA', 'VFPv1', 'VFPv2', 'VFPv3', 'VFPv4', 'VFPv5', '8'] # adding '8' is a hack to make certain checks happy
+COPROC_VERSION_END = {'FPA': 'FPA', 'VFPv1': '8', 'VFPv2': '8', 'VFPv3': '8', 'VFPv4': '8', 'VFPv5': '8', '8': '8'}
 
 VERSION_NAMES = {
 	'1':   'ARMV1',
@@ -27,6 +27,15 @@ VERSION_NAMES = {
 	'8.2': 'ARMV82',
 	'8.3': 'ARMV83',
 	'9':   'ARMV9',
+}
+
+COPROC_VERSION_NAMES = {
+	'VFPv1': 'ARM_VFPV1',
+	'VFPv2': 'ARM_VFPV2',
+	'VFPv3': 'ARM_VFPV3',
+	'VFPv4': 'ARM_VFPV4',
+	'VFPv5': 'ARM_VFPV5',
+#	'8':     'ARM_V8FP', # not actually used, we check the CPU version
 }
 
 FEATURE_LIST = {
@@ -296,6 +305,15 @@ VERSION_TYPES = {
 		'a': {
 			'version': '8',
 			'feature': (),
+		},
+	},
+
+	# introduced in ARMv8, half precision only
+	'8+hp': {
+		'type': 'main',
+		'a': {
+			'version': '8',
+			'feature': ('fp16',),
 		},
 	},
 
@@ -1183,7 +1201,7 @@ def get_proc_version_range(ins):
 		else:
 			removed = len(VERSION_LIST) + 1
 	else:
-		if 'removed' in ins:
+		if 'removed' in ins and VERSION_TYPES[ins['removed']]['type'] == 'coproc':
 			removed = COPROC_VERSION_LIST.index(VERSION_TYPES[ins['removed']]['a']['version'])
 		else:
 			removed = COPROC_VERSION_LIST.index(COPROC_VERSION_END[VERSION_TYPES[ins['added']]['a']['version']]) + 1
@@ -1320,6 +1338,13 @@ if True:
 						continue
 					if 'added' in insB and 'removed' in insA and VERSION_LIST.index(insB['added'][0]) >= VERSION_LIST.index(insA['removed'][0]):
 						continue
+
+#				_, (addedA, removedA) = get_proc_version_range(insA)
+#				_, (addedB, removedB) = get_proc_version_range(insB)
+#				if 'added' in insA and 'removed' and addedA >= removedB:
+#					continue
+#				if 'added' in insB and 'removed' and addedB >= removedA:
+#					continue
 
 				if insA.get('thumbee') == 'no' and insB.get('thumbee') == 'yes':
 					continue
@@ -1582,17 +1607,29 @@ def replace_placeholders(text, placeholders):
 	return text
 
 # creates a logical clause to check version and features
-def generate_predicate(version, features, cpu = 'cpu'):
+def generate_predicate(version, features, cpu = 'cpu', is_coproc = False):
 	predicates = []
 	if version is not None and version != -1:
-		predicates.append(f'{cpu}->config.version >= {VERSION_NAMES[VERSION_LIST[version]]}')
+		if not is_coproc:
+			predicates.append(f'{cpu}->config.version >= {VERSION_NAMES[VERSION_LIST[version]]}')
+		else:
+			if COPROC_VERSION_LIST[version] == 'FPA':
+				predicates.append(f'({cpu}->config.features & (1 << FEATURE_FPA))')
+			else:
+				predicates.append(f'{cpu}->config.fp_version >= {COPROC_VERSION_NAMES[COPROC_VERSION_LIST[version]]}')
 
 	feature_list = []
 	for feature in sorted(features):
 		feature_name = FEATURE_LIST[feature]
-		prefix = '!' if feature in {'G'} else ''
-		assert type(feature_name) is str
-		feature_list.append(f'{prefix}({cpu}->config.features & (1 << {feature_name}))')
+		prefix = '!' if feature == 'G' else ''
+		if type(feature_name) is not str:
+			feature_member_list = []
+			for feature_member in feature_name:
+				feature_member_list.append(f'({cpu}->config.features & (1 << {feature_member}))')
+			feature_list.append('(' + ' || '.join(feature_member_list) + ')')
+		else:
+			assert type(feature_name) is str
+			feature_list.append(f'{prefix}({cpu}->config.features & (1 << {feature_name}))')
 
 	if len(feature_list) == 1:
 		predicates.append(feature_list[0])
@@ -1995,7 +2032,7 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 				if predicates is not None:
 					predicates = predicates
 				if r_intro is False:
-					predicates = f'!{r_profile_check};'
+					predicates = f'!{r_profile_check}'
 
 			if m_predicates is not None:
 				if predicates is not None:
@@ -2011,57 +2048,42 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 		elif added['type'] == 'coproc':
 			# coprocessor instructions
 
-#			# TODO: check features
-
-			intro = added.get('actual_version', added['a']['version'])
-			assert intro in COPROC_VERSION_LIST
+			intro_name = added.get('actual_version', added['a']['version'])
+			intro = COPROC_VERSION_LIST.index(intro_name)
 			feature_enable = set(added['a']['feature'])
 
 			if removed is not None:
-				assert removed['type'] == 'coproc'
-				last = removed.get('actual_version', removed['a']['version'])
-				assert last in COPROC_VERSION_LIST
+				last_name = removed.get('actual_version', removed['a']['version'])
+				if removed['type'] == 'coproc':
+					last = COPROC_VERSION_LIST.index(last_name)
+				else:
+					last = VERSION_LIST.index(last_name)
 				feature_disable = set(removed['a']['feature'])
 			else:
-				last = None
+				if COPROC_VERSION_END[intro_name] == COPROC_VERSION_LIST[-1]:
+					last = None
+				else:
+					last = COPROC_VERSION_LIST.index(COPROC_VERSION_END[intro_name])
 				feature_disable = set()
 
-			# TODO: method == 'step' could have less checks, since we are already in a coprocessor specific processing mode
-			if last is None and intro == COPROC_VERSION_END[intro]:
-				if intro == 'FPA':
-					condition = f'({cpu}->config.features & (1 << FEATURE_FPA)) && ' + condition
+			predicates1 = generate_predicate(intro, feature_enable,  cpu = cpu, is_coproc = True)
+			predicates2 = generate_predicate(last,  feature_disable, cpu = cpu, is_coproc = removed is None or removed['type'] == 'coproc')
+
+			if predicates2 is not None:
+				if predicates2.startswith('!'):
+					predicates2 = predicates2[1:]
 				else:
-					condition = f'{cpu}->config.fp_version == ARM_{intro.upper()} && ' + condition
+					predicates2 = '!(' + predicates2 + ')'
+
+				if predicates1 is None:
+					predicates = predicates2
+				else:
+					predicates = predicates1 + ' && ' + predicates2
 			else:
-				if last is None:
-					last = COPROC_VERSION_END[intro]
-					if last != COPROC_VERSION_LIST[-1]:
-						condition = f'{cpu}->config.fp_version <= ARM_{last.upper()} && ' + condition
-				else:
-					condition = f'{cpu}->config.fp_version < ARM_{last.upper()} && ' + condition
-				condition = f'{cpu}->config.fp_version >= ARM_{intro.upper()} && ' + condition
+				predicates = predicates1
 
-			features = []
-			for feature in sorted(feature_enable):
-				feature_name = FEATURE_LIST[feature]
-				if type(feature_name) is not str:
-					feature_list = []
-					for feature_member in feature_name:
-						feature_list.append(f'({cpu}->config.features & (1 << {feature_member}))')
-					features.append('(' + ' || '.join(feature_list) + ')')
-				else:
-					assert type(feature_name) is str
-					features.append(f'({cpu}->config.features & (1 << {feature_name}))')
-
-			for feature in sorted(feature_disable):
-				feature_name = FEATURE_LIST[feature]
-				assert type(feature_name) is str
-				features.append(f'!({cpu}->config.features & (1 << {feature_name}))')
-
-			if len(features) == 1:
-				condition = features[0] + ' && ' + condition
-			elif len(features) > 1:
-				condition = '(' + ' || '.join(features) + ') && ' + condition
+			if predicates is not None:
+				condition = predicates + ' && ' + condition
 
 		print_file(file, indent + f"{else_kwd}if({condition})")
 		print_file(file, indent + "{")
