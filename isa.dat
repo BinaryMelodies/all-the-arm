@@ -6846,13 +6846,15 @@ begin
 	}
 end
 
-code	!!!@11100d11nnnndddd101sN0m0mmmm
+code	!!!@11100d11nnnndddd10SsN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fadd{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vadd{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vadd{cond()}.f{16<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fadds/faddd
@@ -6937,24 +6939,30 @@ begin
 	}
 end
 
-code	!!!@11101d110000dddd101s11m0mmmm
+code	!!!@11101d110000dddd10Ss11m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
-asm	fabs{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
-asm.ual	vabs{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,m)}
+asm	fabs{s?d:s}{cond()} {vfpop(S's,d)}, {vfpop(S's,m)}
+asm.ual	vabs{cond()}.f{16<<S's} {vfpop(S's,d)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fabss/fabsd
-	if(${s!test})
+	switch(${S's})
 	{
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = fabs($d.?[${m},ix]);
-	}
-	else
-	{
+	case 0b01:
+		// TODO
+		break;
+	case 0b10:
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = fabsf($s.?[${m!rol},ix]);
+		break;
+	case 0b11:
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = fabs($d.?[${m},ix]);
+		break;
 	}
 end
 
@@ -7004,44 +7012,56 @@ begin
 	}
 end
 
-code	!!!@11101d110100dddd101se1m0mmmm
+code	!!!@11101d110100dddd10Sse1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fcmp{e?e:}{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
-asm.ual	vcmp{e?e:}{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,m)}
+asm.ual	vcmp{e?e:}{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fcmps/fcmpd/fcmpes/fcmped
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		a32_cmp64fp(cpu, $d[${d}], $d[${m}]); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		a32_cmp32fp(cpu, $s[${d!rol}], $s[${m!rol}]); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
+		break;
+	case 0b11:
+		// TODO
+		a32_cmp64fp(cpu, $d[${d}], $d[${m}]); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
+		break;
 	}
 end
 
-code	!!!@11101d110101dddd101se1.0....
+code	!!!@11101d110101dddd10Sse1.0....
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 asm	fcmp{e?e:}z{s?d:s}{cond()} {vfpop(s,d)}
-asm.ual	vcmp{e?e:}{cond()}.{s?f64:f32} {vfpop(s,d)}, #0.0
+asm.ual	vcmp{e?e:}{cond()}.f{8<<S's} {vfpop(S's,d)}, #0.0
 added	VFPv1
 begin
 	// fcmpzs/fcmpezd/fcmpzs/fcmpezd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		a32_cmp64fp(cpu, $d[${d}], 0.0); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		a32_cmp32fp(cpu, $s[${d!rol}], 0.0f); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
+		break;
+	case 0b11:
+		// TODO
+		a32_cmp64fp(cpu, $d[${d}], 0.0); // TODO: exceptions on signaling NaN (e=0) and all NaN (e=1)
+		break;
 	}
 end
 
@@ -7723,13 +7743,13 @@ begin
 	}
 end
 
-code.a	111100110d1Snnnndddd1101NQm0mmmm
-code.t	111111110d1Snnnndddd1101NQm0mmmm
+code.a	111100110d1Hnnnndddd1101NQm0mmmm
+code.t	111111110d1Hnnnndddd1101NQm0mmmm
 exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vabd{cond()}.f{S?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vabd{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vabd
@@ -7754,11 +7774,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01110Qm0mmmm
-code.t	111111111d111001dddd01110Qm0mmmm
+code.a	111100111d11SS01dddd01110Qm0mmmm
+code.t	111111111d11SS01dddd01110Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vabs{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vabs{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1
 begin
 	// vabs
@@ -7768,12 +7791,13 @@ begin
 	}
 end
 
-code.a	111100110do0nnnndddd1110NQm1mmmm
-code.t	111111110do0nnnndddd1110NQm1mmmm
+code.a	111100110doHnnnndddd1110NQm1mmmm
+code.t	111111110doHnnnndddd1110NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	v{o?acge;acgt}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	v{o?acge;acgt}{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vacge/vacgt
@@ -7798,12 +7822,13 @@ begin
 	}
 end
 
-code.a	111100100d00nnnndddd1101NQm0mmmm
-code.t	111011110d00nnnndddd1101NQm0mmmm
+code.a	111100100d0Hnnnndddd1101NQm0mmmm
+code.t	111011110d0Hnnnndddd1101NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vadd{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vadd{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vadd
@@ -7918,12 +7943,13 @@ begin
 	}
 end
 
-code.a	111100100d00nnnndddd1110NQm0mmmm
-code.t	111011110d00nnnndddd1110NQm0mmmm
+code.a	111100100d0Hnnnndddd1110NQm0mmmm
+code.t	111011110d0Hnnnndddd1110NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vceq{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vceq{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vceq
@@ -7948,11 +7974,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01010Qm0mmmm
-code.t	111111111d111001dddd01010Qm0mmmm
+code.a	111100111d11SS01dddd01010Qm0mmmm
+code.t	111111111d11SS01dddd01010Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vceq{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
+asm	vceq{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
 added	AdvSIMDv1+sp
 begin
 	// vceq
@@ -7978,12 +8007,13 @@ begin
 	}
 end
 
-code.a	111100110d00nnnndddd1110NQm0mmmm
-code.t	111111110d00nnnndddd1110NQm0mmmm
+code.a	111100110d0Hnnnndddd1110NQm0mmmm
+code.t	111111110d0Hnnnndddd1110NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcge{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vcge{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vcge
@@ -8008,11 +8038,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01001Qm0mmmm
-code.t	111111111d111001dddd01001Qm0mmmm
+code.a	111100111d11SS01dddd01001Qm0mmmm
+code.t	111111111d11SS01dddd01001Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcge{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
+asm	vcge{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
 added	AdvSIMDv1+sp
 begin
 	// vcge
@@ -8038,12 +8071,13 @@ begin
 	}
 end
 
-code.a	111100110d10nnnndddd1110NQm0mmmm
-code.t	111111110d10nnnndddd1110NQm0mmmm
+code.a	111100110d1Hnnnndddd1110NQm0mmmm
+code.t	111111110d1Hnnnndddd1110NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcgt{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vcgt{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vcgt
@@ -8068,11 +8102,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01000Qm0mmmm
-code.t	111111111d111001dddd01000Qm0mmmm
+code.a	111100111d11SS01dddd01000Qm0mmmm
+code.t	111111111d11SS01dddd01000Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcgt{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
+asm	vcgt{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
 added	AdvSIMDv1+sp
 begin
 	// vcgt
@@ -8097,11 +8134,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01011Qm0mmmm
-code.t	111111111d111001dddd01011Qm0mmmm
+code.a	111100111d11SS01dddd01011Qm0mmmm
+code.t	111111111d11SS01dddd01011Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcle{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
+asm	vcle{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
 added	AdvSIMDv1+sp
 begin
 	// vcle
@@ -8141,11 +8181,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01100Qm0mmmm
-code.t	111111111d111001dddd01100Qm0mmmm
+code.a	111100111d11SS01dddd01100Qm0mmmm
+code.t	111111111d11SS01dddd01100Qm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vclt{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
+asm	vclt{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #0
 added	AdvSIMDv1+sp
 begin
 	// vclt
@@ -8172,7 +8215,6 @@ end
 
 code.a	111100111d110000dddd01010Qm0mmmm
 code.t	111111111d110000dddd01010Qm0mmmm
-exclude	............00..................
 exclude	...................1.....1......
 exclude	.........................1.....1
 asm	vcnt{cond()} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
@@ -9936,6 +9978,55 @@ asm	sha256su0.32 q{d>>1}, q{m>>1}
 added	8
 begin
 	// sha256su0
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+########	ARMv8.3
+
+code.a	1111110r1d0Snnnndddd1000NQm0mmmm
+code.t	1111110r1d0Snnnndddd1000NQm0mmmm
+exclude	...........0....................	except	hp
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vcadd{cond()}.f{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}, #{r?270:90}
+added	8.3
+begin
+	// vcadd
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	1111110rrd1Snnnndddd1000NQm0mmmm
+code.t	1111110rrd1Snnnndddd1000NQm0mmmm
+exclude	...........0....................	except	hp
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vcmla{cond()}.f{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}, #{90*r}
+added	8.3
+begin
+	// vcmla
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	11111110Sdrrnnnndddd1000NQm0mmmm
+code.t	11111110Sdrrnnnndddd1000NQm0mmmm
+exclude	........0.......................	except	hp
+exclude	...............1.........1......
+exclude	...................1.....1......
+asm	vcmla{cond()}.f{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,5-S)}[{m<<S>>5}], #{90*r}
+added	8.3
+begin
+	// vcmla
 	if(${cond()})
 	{
 		// TODO

@@ -503,6 +503,7 @@ FEATURES = {
 	'sp': 'VFP',
 	'dp': 'D',
 	'D32': 'D32',
+	'hp': 'fp16',
 }
 
 # these are processed as if they were separate instruction sets, but they are just coprocessor operation specializations
@@ -2449,12 +2450,19 @@ def generate_branches(mode, order, indent, method, cpnum = None):
 								args.append(f", {value}")
 							elif fun == 'vfpop':
 								size, value = arg.split(',')
-								size = parse_expression(mode, size, varfields, test_only = True)
+
+								if '!' in size:
+									check = parse_expression(mode, size, varfields, test_only = True)
+								else:
+									check, bits = parse_variable(mode, size, varfields)
+									if bits > 1:
+										check = f'({check}) == 0x{(1 << bits) - 1:X}'
+
 								value, _ = parse_variable(mode, value, varfields)
 								fmtstr += '%c%d'
-								argument = f"{size} ? 'd' : 's'"
+								argument = f"{check} ? 'd' : 's'"
 								args.append(f", {argument}")
-								argument = f"{size} ? {value} : ((({value}) & 0xF) << 1) | (({value}) >> 4)"
+								argument = f"{check} ? {value} : ((({value}) & 0xF) << 1) | (({value}) >> 4)"
 								args.append(f", {argument}")
 							elif fun == 'bitmask':
 								assert mode == 'a64'
