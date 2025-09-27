@@ -7083,14 +7083,17 @@ begin
 	}
 end
 
-code	!!!@11101d111000dddd101s01m0mmmm
+code	!!!@11101d111000dddd10Ss01m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 asm	fuito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
-asm.ual	vcvt{cond()}.{s?f64:f32}.u32 {vfpop(s,d)}, s{m!rol}
+asm.ual	vcvt{cond()}.f{8<<S's}.u32 {vfpop(S's,d)}, s{m!rol}
 added	VFPv1
 begin
 	// fuitos/fuitod
+	// TODO: half precision
 	if(${s!test})
 	{
 		// TODO
@@ -7103,14 +7106,17 @@ begin
 	}
 end
 
-code	!!!@11101d111000dddd101s11m0mmmm
+code	!!!@11101d111000dddd10Ss11m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 asm	fsito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
-asm.ual	vcvt{cond()}.{s?f64:f32}.s32 {vfpop(s,d)}, s{m!rol}
+asm.ual	vcvt{cond()}.f{8<<S's}.s32 {vfpop(S's,d)}, s{m!rol}
 added	VFPv1
 begin
 	// fsitos/fsitod
+	// TODO: half precision
 	if(${s!test})
 	{
 		// TODO
@@ -7123,14 +7129,17 @@ begin
 	}
 end
 
-code	!!!@11101d111100dddd101sr1m0mmmm
+code	!!!@11101d111100dddd10Ssr1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.......................1..1.....	except	D32
 asm	ftoui{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
-asm.ual	vcvt{r?r:}{cond()}.u32.{s?f64:f32} s{d!rol}, {vfpop(s,m)}
+asm.ual	vcvt{r?r:}{cond()}.u32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// ftouis/ftouid/ftouizs/ftouizd
+	// TODO: half precision
 	if(${r!test})
 	{
 		if(${s!test})
@@ -7159,14 +7168,17 @@ begin
 	}
 end
 
-code	!!!@11101d111101dddd101sr1m0mmmm
+code	!!!@11101d111101dddd10Ssr1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.......................1..1.....	except	D32
 asm	ftosi{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
-asm.ual	vcvt{r?r:}{cond()}.s32.{s?f64:f32} s{d!rol}, {vfpop(s,m)}
+asm.ual	vcvt{r?r:}{cond()}.s32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// ftosis/ftosid/ftosizs/ftosizd
+	// TODO: half precision
 	if(${r!test})
 	{
 		if(${s!test})
@@ -7500,10 +7512,12 @@ end
 
 ######## VFPv3
 
-code	!!!@11101d11101Udddd101sx1I0iiii
+code	!!!@11101d11101Udddd10Ssx1I0iiii
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........
-asm	vcvt{cond()}.{s?f64:f32}.{U?u:s}{x?16:32} {vfpop(s,d)}, {vfpop(s,d)}, #{16<<s+i'I}
+asm	vcvt{cond()}.f{8<<s}.{U?u:s}{x?16:32} {vfpop(S's,d)}, {vfpop(S's,d)}, #{16<<x+i'I}
 added	VFPv3
 begin
 	// vcvt
@@ -7511,10 +7525,12 @@ begin
 	// TODO
 end
 
-code	!!!@11101d11111Udddd101sx1I0iiii
+code	!!!@11101d11111Udddd10Ssx1I0iiii
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........
-asm	vcvt{cond()}.{U?u:s}{x?16:32}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,d)}, #{16<<s+i'I}
+asm	vcvt{cond()}.{U?u:s}{x?16:32}.f{8<<s} {vfpop(S's,d)}, {vfpop(S's,d)}, #{16<<x+i'I}
 added	VFPv3D
 begin
 	// vcvt
@@ -8227,11 +8243,14 @@ begin
 	}
 end
 
-code.a	111100111d111011dddd011ooQm0mmmm
-code.t	111111111d111011dddd011ooQm0mmmm
+code.a	111100111d11SS11dddd011ooQm0mmmm
+code.t	111111111d11SS11dddd011ooQm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcvt{cond()}.{o?f32.s32;f32.u32;s32.f32;u32.f32} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vcvt{cond()}.{o?;;s32.;u32.}f{8<<S}{o?.s32;.u32;;} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vcvt
@@ -8241,11 +8260,12 @@ begin
 	}
 end
 
-code.a	1111001U1d1iiiiidddd111o0Qm1mmmm
-code.t	111U11111d1iiiiidddd111o0Qm1mmmm
+code.a	1111001U1d1iiiiidddd11So0Qm1mmmm
+code.t	111U11111d1iiiiidddd11So0Qm1mmmm
+exclude	......................0.........	before	8+hp
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcvt{cond()}.{o'U?f32.s32;f32.u32;s32.f32;u32.f32} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{32-i}
+asm	vcvt{cond()}.{o'U?;;s32.;u32.}f{16<<S}{o'U?.s32;.u32;;} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{32-i}
 added	AdvSIMDv1+sp
 begin
 	// vcvt
