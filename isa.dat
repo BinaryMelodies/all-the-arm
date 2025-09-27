@@ -7083,127 +7083,86 @@ begin
 	}
 end
 
-code	!!!@11101d111000dddd10Ss01m0mmmm
+code	!!!@11101d111000dddd10SsZ1m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
-asm	fuito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
-asm.ual	vcvt{cond()}.f{8<<S's}.u32 {vfpop(S's,d)}, s{m!rol}
+asm	f{Z?s:u}ito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
+asm.ual	vcvt{cond()}.f{8<<S's}.{Z?s:u}32 {vfpop(S's,d)}, s{m!rol}
 added	VFPv1
 begin
-	// fuitos/fuitod
+	// fuitos/fuitod/fsitos/fsitod
 	// TODO: half precision
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		$d[${d}] = (uint32_t)float_as_word($s[${m!rol}]);
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
-		$s[${d!rol}] = (uint32_t)float_as_word($s[${m!rol}]);
+		if(${Z!test})
+			$s[${d!rol}] = (int32_t)float_as_word($s[${m!rol}]);
+		else
+			$s[${d!rol}] = (uint32_t)float_as_word($s[${m!rol}]);
+		break;
+	case 0b11:
+		// TODO
+		if(${Z!test})
+			$d[${d}] = (int32_t)float_as_word($s[${m!rol}]);
+		else
+			$d[${d}] = (uint32_t)float_as_word($s[${m!rol}]);
+		break;
 	}
 end
 
-code	!!!@11101d111000dddd10Ss11m0mmmm
-exclude	......................0.........	before	8+hp
-exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
-exclude	.........1.............1........	except	D32
-asm	fsito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
-asm.ual	vcvt{cond()}.f{8<<S's}.s32 {vfpop(S's,d)}, s{m!rol}
-added	VFPv1
-begin
-	// fsitos/fsitod
-	// TODO: half precision
-	if(${s!test})
-	{
-		// TODO
-		$d[${d}] = (int32_t)float_as_word($s[${m!rol}]);
-	}
-	else
-	{
-		// TODO
-		$s[${d!rol}] = (int32_t)float_as_word($s[${m!rol}]);
-	}
-end
-
-code	!!!@11101d111100dddd10Ssr1m0mmmm
+code	!!!@11101d11110Zdddd10Ssr1m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
 exclude	.......................1........	except	dp
 exclude	.......................1..1.....	except	D32
-asm	ftoui{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
-asm.ual	vcvt{r?r:}{cond()}.u32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
+asm	fto{Z?s:u}i{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
+asm.ual	vcvt{r?r:}{cond()}.{Z?s:u}32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
 added	VFPv1
 begin
-	// ftouis/ftouid/ftouizs/ftouizd
+	// ftouis/ftouid/ftouizs/ftouizd/ftosis/ftosid/ftosizs/ftosizd
 	// TODO: half precision
-	if(${r!test})
+	switch(${r'S's})
 	{
-		if(${s!test})
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((uint32_t)$d[${m}]);
-		}
-		else
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((uint32_t)$s[${m!rol}]);
-		}
-	}
-	else
-	{
-		if(${s!test})
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((uint32_t)nearbyint($d[${m}]));
-		}
-		else
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((uint32_t)nearbyintf($s[${m!rol}]));
-		}
-	}
-end
-
-code	!!!@11101d111101dddd10Ssr1m0mmmm
-exclude	......................0.........	before	8+hp
-exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
-exclude	.......................1..1.....	except	D32
-asm	ftosi{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
-asm.ual	vcvt{r?r:}{cond()}.s32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
-added	VFPv1
-begin
-	// ftosis/ftosid/ftosizs/ftosizd
-	// TODO: half precision
-	if(${r!test})
-	{
-		if(${s!test})
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((int32_t)$d[${m}]);
-		}
-		else
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((int32_t)$s[${m!rol}]);
-		}
-	}
-	else
-	{
-		if(${s!test})
-		{
-			// TODO
-			$s[${d!rol}] = word_as_float((int32_t)nearbyint($d[${m}]));
-		}
-		else
-		{
-			// TODO
+	case 0b001:
+		// TODO
+		break;
+	case 0b010:
+		// TODO
+		if(${Z!test})
 			$s[${d!rol}] = word_as_float((int32_t)nearbyintf($s[${m!rol}]));
-		}
+		else
+			$s[${d!rol}] = word_as_float((uint32_t)nearbyintf($s[${m!rol}]));
+		break;
+	case 0b011:
+		// TODO
+		if(${Z!test})
+			$s[${d!rol}] = word_as_float((int32_t)nearbyint($d[${m}]));
+		else
+			$s[${d!rol}] = word_as_float((uint32_t)nearbyint($d[${m}]));
+		break;
+	case 0b101:
+		// TODO
+		break;
+	case 0b110:
+		// TODO
+		if(${Z!test})
+			$s[${d!rol}] = word_as_float((int32_t)$s[${m!rol}]);
+		else
+			$s[${d!rol}] = word_as_float((uint32_t)$s[${m!rol}]);
+		break;
+	case 0b111:
+		// TODO
+		if(${Z!test})
+			$s[${d!rol}] = word_as_float((int32_t)$d[${m}]);
+		else
+			$s[${d!rol}] = word_as_float((uint32_t)$d[${m}]);
+		break;
 	}
 end
 
@@ -8243,14 +8202,14 @@ begin
 	}
 end
 
-code.a	111100111d11SS11dddd011ooQm0mmmm
-code.t	111111111d11SS11dddd011ooQm0mmmm
+code.a	111100111d11SS11dddd0110oQm0mmmm
+code.t	111111111d11SS11dddd0110oQm0mmmm
 exclude	............0...................	before	8+hp
 exclude	............00..................	since	8+hp
 exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcvt{cond()}.{o?;;s32.;u32.}f{8<<S}{o?.s32;.u32;;} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vcvt{cond()}.f{8<<S}.{o?s;u}32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vcvt
@@ -8260,12 +8219,44 @@ begin
 	}
 end
 
-code.a	1111001U1d1iiiiidddd11So0Qm1mmmm
-code.t	111U11111d1iiiiidddd11So0Qm1mmmm
+code.a	111100111d11SS11dddd0111oQm0mmmm
+code.t	111111111d11SS11dddd0111oQm0mmmm
+exclude	............0...................	before	8+hp
+exclude	............00..................	since	8+hp
+exclude	............11..................
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vcvt{cond()}.{o?s;u}32.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+added	AdvSIMDv1+sp
+begin
+	// vcvt
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	1111001U1d1iiiiidddd11S00Qm1mmmm
+code.t	111U11111d1iiiiidddd11S00Qm1mmmm
 exclude	......................0.........	before	8+hp
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vcvt{cond()}.{o'U?;;s32.;u32.}f{16<<S}{o'U?.s32;.u32;;} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{32-i}
+asm	vcvt{cond()}.f{16<<S}.{U?s;u}32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{32-i}
+added	AdvSIMDv1+sp
+begin
+	// vcvt
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	1111001U1d1iiiiidddd11S10Qm1mmmm
+code.t	111U11111d1iiiiidddd11S10Qm1mmmm
+exclude	......................0.........	before	8+hp
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vcvt{cond()}.{U?s;u}32.f{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{32-i}
 added	AdvSIMDv1+sp
 begin
 	// vcvt
