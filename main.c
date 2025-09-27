@@ -1199,6 +1199,7 @@ int main(int argc, char * argv[], char * envp[])
 							// extension: switch modes between 26/32/64-bit modes
 							uint32_t lr = cpu->r[PC];
 							uint32_t pc = cpu->r[A32_LR];
+							regnum_t lrnum = A32_LR;
 							if(arm_get_current_instruction_set(cpu) == ISA_AARCH26)
 							{
 								// 00: A32, 01/11: T32, 10: A64
@@ -1214,6 +1215,7 @@ int main(int argc, char * argv[], char * envp[])
 								{
 									arm_set_isa(cpu, ISA_AARCH64);
 									pc &= ~3;
+									lrnum = A64_LR;
 								}
 								else
 								{
@@ -1231,14 +1233,19 @@ int main(int argc, char * argv[], char * envp[])
 									lr |= 1;
 
 								if((pc & 2))
+								{
 									arm_set_isa(cpu, ISA_AARCH64);
+									lrnum = A64_LR;
+								}
 								else
+								{
 									arm_set_isa(cpu, ISA_AARCH26);
+								}
 
 								pc = cpu->r[A32_LR] & ~3;
 							}
 							cpu->r[PC] = pc;
-							cpu->r[A32_LR] = lr;
+							cpu->r[lrnum] = lr;
 						}
 						else if(swi_number == 0)
 						{
@@ -1272,7 +1279,7 @@ int main(int argc, char * argv[], char * envp[])
 							// extension: switch modes between 26/32/64-bit modes
 							// 00: A32, 01/11: T32, 10: A26
 							uint32_t lr = cpu->r[PC];
-							uint32_t pc = cpu->r[A32_LR];
+							uint32_t pc = cpu->r[A64_LR];
 
 							lr &= ~3;
 

@@ -113,9 +113,24 @@ jazelle_end:
 	.align	4
 	.arm
 a26_start:
-	adr	lr, thumb_exit+1
-	@ extension: jump to Thumb mode
+	nop
+
+	mov	r0, #1
+	ldr	r1, =message_arm26
+	mov	r2, #length_message_arm26
+	swi	#0x900000 + 4
+
+	nop
+
+	adr	lr, a64_start+2
+	@ extension: jump to ARM64 mode
 	swi	#1
+
+# buffer word so the GNU assembler does automatically insert $d before all data directives
+	.word	0
+a64_start:
+$x:
+	.incbin	"all_isa.a64.bin"
 
 	.thumb
 thumb_exit:
@@ -142,4 +157,9 @@ message_jazelle:
 	.ascii	"Called from Jazelle mode"
 	.byte	10
 	.equ	length_message_jazelle, . - message_jazelle
+
+message_arm26:
+	.ascii	"Called from 26-bit ARM mode"
+	.byte	10
+	.equ	length_message_arm26, . - message_arm26
 

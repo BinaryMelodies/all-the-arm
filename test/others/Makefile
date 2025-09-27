@@ -2,14 +2,18 @@
 all: all_isa puthex.a32 puthex.t32 puthex.a64 puthex.class test_clinit.class test_static.class test_string.class test_indirect.class
 
 clean:
-	rm -f all_isa all_isa.o puthex.a32 puthex.a32.o puthex.t32 puthex.t32.o puthex.a64 puthex.a64.o puthex.class test_clinit.class test_static.class test_string.class test_indirect.class test_indirect\$$Call.class
+	rm -f all_isa all_isa.o all_isa.a64.bin all_isa.a64.o puthex.a32 puthex.a32.o puthex.t32 puthex.t32.o puthex.a64 puthex.a64.o puthex.class test_clinit.class test_static.class test_string.class test_indirect.class test_indirect\$$Call.class
 
 distclean: clean
 	rm -f *~
 
-all_isa: all_isa.s
+all_isa: all_isa.s all_isa.a64.bin
 	arm-none-eabi-as -o all_isa.o all_isa.s
 	arm-none-eabi-ld -o all_isa all_isa.o
+
+all_isa.a64.bin: all_isa.a64.s
+	aarch64-elf-as $< -o all_isa.a64.o
+	aarch64-elf-objcopy -Obinary all_isa.a64.o $@
 
 puthex.a32: puthex.32.s
 	arm-none-eabi-as -march=armv2 -o $@.o $< --defsym=AARCH32=1
