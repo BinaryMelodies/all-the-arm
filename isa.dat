@@ -8698,12 +8698,13 @@ begin
 	}
 end
 
-code.a	111100100do0nnnndddd1111NQm0mmmm
-code.t	111U11110do0nnnndddd1111NQm0mmmm
+code.a	111100100doHnnnndddd1111NQm0mmmm
+code.t	111U11110doHnnnndddd1111NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	v{o?min:max}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	v{o?min:max}{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vmax/vmin
@@ -8743,12 +8744,13 @@ begin
 	}
 end
 
-code.a	111100100do0nnnndddd1101NQm1mmmm
-code.t	111011110do0nnnndddd1101NQm1mmmm
+code.a	111100100doHnnnndddd1101NQm1mmmm
+code.t	111011110doHnnnndddd1101NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	v{o?mls:mla}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	v{o?mls:mla}{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vmla/vmls
@@ -8891,12 +8893,13 @@ begin
 	}
 end
 
-code.a	111100110d00nnnndddd1101NQm1mmmm
-code.t	111111110d00nnnndddd1101NQm1mmmm
+code.a	111100110d0Hnnnndddd1101NQm1mmmm
+code.t	111111110d0Hnnnndddd1101NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vmul{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vmul{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vmul
@@ -9086,9 +9089,10 @@ begin
 	}
 end
 
-code.a	111100110d00nnnndddd1101N0m0mmmm
-code.t	111111110d00nnnndddd1101N0m0mmmm
-asm	vpadd{cond()}.f32 d{d}, d{N'n}, d{m}
+code.a	111100110d0Hnnnndddd1101N0m0mmmm
+code.t	111111110d0Hnnnndddd1101N0m0mmmm
+exclude	...........1....................	before	8+hp
+asm	vpadd{cond()}.f{H?16:32} d{d}, d{N'n}, d{m}
 added	AdvSIMDv1+sp
 begin
 	// vpadd
@@ -9125,9 +9129,10 @@ begin
 	}
 end
 
-code.a	111100110do0nnnndddd1111N0m0mmmm
-code.t	111111110do0nnnndddd1111N0m0mmmm
-asm	vp{o?min:max}{cond()}.f32 d{d}, d{N'n}, d{m}
+code.a	111100110doHnnnndddd1111N0m0mmmm
+code.t	111111110doHnnnndddd1111N0m0mmmm
+exclude	...........1....................	before	8+hp
+asm	vp{o?min:max}{cond()}.f{H?16:32} d{d}, d{N'n}, d{m}
 added	AdvSIMDv1+sp
 begin
 	// vpmax/vpmin
@@ -9463,12 +9468,13 @@ begin
 	}
 end
 
-code.a	111100100d00nnnndddd1111NQm1mmmm
-code.t	111011110d00nnnndddd1111NQm1mmmm
+code.a	111100100d0Hnnnndddd1111NQm1mmmm
+code.t	111011110d0Hnnnndddd1111NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vrecps{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vrecps{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vrecps
@@ -9597,12 +9603,13 @@ begin
 	}
 end
 
-code.a	111100100d10nnnndddd1111NQm1mmmm
-code.t	111011110d10nnnndddd1111NQm1mmmm
+code.a	111100100d1Hnnnndddd1111NQm1mmmm
+code.t	111011110d1Hnnnndddd1111NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vrsqrts{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vrsqrts{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vrsqrts
@@ -9787,12 +9794,13 @@ begin
 	}
 end
 
-code.a	111100100d10nnnndddd1101NQm0mmmm
-code.t	111011110d10nnnndddd1101NQm0mmmm
+code.a	111100100d1Hnnnndddd1101NQm0mmmm
+code.t	111011110d1Hnnnndddd1101NQm0mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vsub{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vsub{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1+sp
 begin
 	// vsub
@@ -9960,12 +9968,13 @@ end
 
 ######## Advanced SIMDv2
 
-code.a	111100100do0nnnndddd1100NQm1mmmm
-code.t	111011110do0nnnndddd1100NQm1mmmm
+code.a	111100100doHnnnndddd1100NQm1mmmm
+code.t	111011110doHnnnndddd1100NQm1mmmm
+exclude	...........1....................	before	8+hp
 exclude	...............1.........1......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vfm{o?s:a}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+asm	vfm{o?s:a}{cond()}.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv2+sp
 begin
 	// vfma/vfms
@@ -10088,6 +10097,22 @@ asm	vcvt{R?a;n;p;m}.{U?u:s}32.f{8<<s} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	8
 begin
 	// vcvta/vcvtn/vcvtp/vcvtm
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100110doHnnnndddd1111NQm1mmmm
+code.t	111100110doHnnnndddd1111NQm1mmmm
+exclude	...........1....................	except	hp
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	v{o?min:max}nm.f{H?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+added	8
+begin
+	// vmaxnm/vminnm
 	if(${cond()})
 	{
 		// TODO
