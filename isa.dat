@@ -6702,219 +6702,271 @@ end
 # the shorthands $s.v[n,ix] and $d.v[n,ix] access the registers as 8 and 4 element register banks, respectively
 # the shorthand $s.?[n,ix] and $d.?[n,ix] access them as bank registers, except if they fall into the first bank, in which case ix is ignored and treated as 0
 
-code	!!!@11100d00nnnndddd101sN0m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d00nnnndddd10SsN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fmac{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vmla{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vmla{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fmacs/fmacd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${d},ix] + $d.v[${N'n},ix] * $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${d!rol},ix] + $s.v[${N'n!rol},ix] * $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${d},ix] + $d.v[${N'n},ix] * $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d00nnnndddd101sN1m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d00nnnndddd10SsN1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fnmac{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vmls{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vmls{cond()}.{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fnmacs/fnmacd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${d},ix] - $d.v[${N'n},ix] * $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${d!rol},ix] - $s.v[${N'n!rol},ix] * $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${d},ix] - $d.v[${N'n},ix] * $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d01nnnndddd101sN0m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d01nnnndddd10SsN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fmsc{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vnmls{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vnmls{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fmscs/fmscd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = -$d.v[${d},ix] + $d.v[${N'n},ix] * $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = -$s.v[${d!rol},ix] + $s.v[${N'n!rol},ix] * $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = -$d.v[${d},ix] + $d.v[${N'n},ix] * $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d01nnnndddd101sN1m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d01nnnndddd10SsN1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fnmsc{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vnmla{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vnmla{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fnmscs/fnmscd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = -$d.v[${d},ix] - $d.v[${N'n},ix] * $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = -$s.v[${d!rol},ix] - $s.v[${N'n!rol},ix] * $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = -$d.v[${d},ix] - $d.v[${N'n},ix] * $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d10nnnndddd101sN0m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d10nnnndddd10SsN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fmul{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vmul.{s?f64:f32}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vmul{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fmuls/fmuld
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${N'n},ix] * $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${N'n!rol},ix] * $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${N'n},ix] * $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d10nnnndddd101sN1m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d10nnnndddd10SsN1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fnmul{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vnmul{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vnmul{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fnmuls/fnmuld
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = -($d.v[${N'n},ix] * $d.?[${m},ix]);
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = -($s.v[${N'n!rol},ix] * $s.?[${m!rol},ix]);
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = -($d.v[${N'n},ix] * $d.?[${m},ix]);
+		break;
 	}
 end
 
 code	!!!@11100d11nnnndddd10SsN0m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fadd{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vadd{cond()}.f{16<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
+asm.ual	vadd{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fadds/faddd
-	if(${s!test})
+	switch(${S's})
 	{
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${N'n},ix] + $d.?[${m},ix];
-	}
-	else
-	{
+	case 0b01:
+		// TODO
+		break;
+	case 0b10:
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${N'n!rol},ix] + $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${N'n},ix] + $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11100d11nnnndddd101sN1m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11100d11nnnndddd10SsN1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fsub{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vsub{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vsub{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fsubs/fsubd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${N'n},ix] - $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${N'n!rol},ix] - $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${N'n},ix] - $d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11101d00nnnndddd101sN0m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11101d00nnnndddd10SsN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................11.......	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fdiv{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-asm.ual	vdiv{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm.ual	vdiv{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,N'n)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fdivs/fdivd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = $d.v[${N'n},ix] / $d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = $s.v[${N'n!rol},ix] / $s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = $d.v[${N'n},ix] / $d.?[${m},ix];
+		break;
 	}
 end
 
@@ -6923,7 +6975,7 @@ exclude	.......................1........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fcpy{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
-asm.ual	vmov{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,m)}
+asm.ual	vmov{cond()}.f{32<<s} {vfpop(s,d)}, {vfpop(s,m)}
 added	VFPv1
 begin
 	// fcpys/fcpyd
@@ -6942,7 +6994,7 @@ end
 code	!!!@11101d110000dddd10Ss11m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fabs{s?d:s}{cond()} {vfpop(S's,d)}, {vfpop(S's,m)}
@@ -6966,56 +7018,68 @@ begin
 	}
 end
 
-code	!!!@11101d110001dddd101s01m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11101d110001dddd10Ss01m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fneg{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
-asm.ual	vneg{s?.f64:.f32}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
+asm.ual	vneg{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fnegs/fnegd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = -$d.?[${m},ix];
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = -$s.?[${m!rol},ix];
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = -$d.?[${m},ix];
+		break;
 	}
 end
 
-code	!!!@11101d110001dddd101s11m0mmmm
-exclude	.......................1........	except	dp
+code	!!!@11101d110001dddd10Ss11m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fsqrt{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
-asm.ual	vsqrt{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,m)}
+asm.ual	vsqrt{cond()}.f{8<<S's} {vfpop(S's,d)}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// fsqrts/fsqrtd
-	if(${s!test})
+	switch(${S's})
 	{
+	case 0b01:
 		// TODO
-		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
-			$d.v[${d},ix] = sqrt($d.?[${m},ix]);
-	}
-	else
-	{
+		break;
+	case 0b10:
 		// TODO
 		for(uint8_t ix = 0; ix < ${sveclen(d)}; ix++)
 			$s.v[${d!rol},ix] = sqrtf($s.?[${m!rol},ix]);
+		break;
+	case 0b11:
+		// TODO
+		for(uint8_t ix = 0; ix < ${dveclen(d)}; ix++)
+			$d.v[${d},ix] = sqrt($d.?[${m},ix]);
+		break;
 	}
 end
 
 code	!!!@11101d110100dddd10Sse1m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 exclude	.......................1..1.....	except	D32
 asm	fcmp{e?e:}{s?d:s}{cond()} {vfpop(s,d)}, {vfpop(s,m)}
@@ -7042,7 +7106,7 @@ end
 code	!!!@11101d110101dddd10Sse1.0....
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 asm	fcmp{e?e:}z{s?d:s}{cond()} {vfpop(s,d)}
 asm.ual	vcmp{e?e:}{cond()}.f{8<<S's} {vfpop(S's,d)}, #0.0
@@ -7086,14 +7150,13 @@ end
 code	!!!@11101d111000dddd10SsZ1m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........	except	D32
 asm	f{Z?s:u}ito{s?d:s}{cond()} {vfpop(s,d)}, s{m!rol}
 asm.ual	vcvt{cond()}.f{8<<S's}.{Z?s:u}32 {vfpop(S's,d)}, s{m!rol}
 added	VFPv1
 begin
 	// fuitos/fuitod/fsitos/fsitod
-	// TODO: half precision
 	switch(${S's})
 	{
 	case 0b01:
@@ -7119,14 +7182,13 @@ end
 code	!!!@11101d11110Zdddd10Ssr1m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.......................1..1.....	except	D32
 asm	fto{Z?s:u}i{r?z:}{s?d:s}{cond()} s{d!rol}, {vfpop(s,m)}
 asm.ual	vcvt{r?r:}{cond()}.{Z?s:u}32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
 added	VFPv1
 begin
 	// ftouis/ftouid/ftouizs/ftouizd/ftosis/ftosid/ftosizs/ftosizd
-	// TODO: half precision
 	switch(${r'S's})
 	{
 	case 0b001:
@@ -7197,6 +7259,15 @@ begin
 	{
 		a32_write64fp(cpu, $address, $d[${d}]);
 	}
+end
+
+code	!!!@1101Ud0L....dddd1001........
+asm	{L?fld:fst}s{cond()} s{d!rol}, {mem_operand()}
+asm.ual	{L?vldr:vstr}{cond()}.16 s{d!rol}, {mem_operand()}
+added	8
+begin
+	// vldr/vstr
+	// TODO
 end
 
 code	!!!@110PUdWLnnnndddd1010oooooooo
@@ -7474,7 +7545,7 @@ end
 code	!!!@11101d11101Udddd10Ssx1I0iiii
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........
 asm	vcvt{cond()}.f{8<<s}.{U?u:s}{x?16:32} {vfpop(S's,d)}, {vfpop(S's,d)}, #{16<<x+i'I}
 added	VFPv3
@@ -7487,7 +7558,7 @@ end
 code	!!!@11101d11111Udddd10Ssx1I0iiii
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
-exclude	.......................1........	except	dp
+exclude	......................11........	except	dp
 exclude	.........1.............1........
 asm	vcvt{cond()}.{U?u:s}{x?16:32}.f{8<<s} {vfpop(S's,d)}, {vfpop(S's,d)}, #{16<<x+i'I}
 added	VFPv3D
@@ -7497,9 +7568,11 @@ begin
 	// TODO
 end
 
-code	!!!@11101d11iiiidddd101s@0@0iiii
-exclude	.......................1........	except	dp
-asm	vmov{cond()}.{s?f64:f32} {vfpop(s,d)}, #{i:2X}
+code	!!!@11101d11iiiidddd10ss@0@0iiii
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+asm	vmov{cond()}.f{8<<s} {vfpop(s,d)}, #{i:2X}
 added	VFPv3
 begin
 	// vmov
@@ -7528,9 +7601,11 @@ begin
 	// TODO
 end
 
-code	!!!@11101d01nnnndddd101sNom0mmmm
-exclude	.......................1........	except	dp
-asm	vfnm{o?a:s}{cond()}.{s?f64:f32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+code	!!!@11101d01nnnndddd10ssNom0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+asm	vfnm{o?a:s}{cond()}.f{8<<s} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
 added	VFPv4
 begin
 	// vfnma/vfnms
@@ -7540,63 +7615,23 @@ end
 
 ######## VFPv5 (FPv5)
 
-isa	T32
-
-code	11111101d1111RR dddd101sU1m0mmmmm
-exclude	............... .......1.........	except	dp
-it	no
-asm	vcvt{R?a;n;p;m}.{U?u:s}32.f{s?64:32} s{d!rol}, {vfpop(s,m)}
+code	!!!@11101d110111dddd10ss01m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+asm	vrintx{cond()}.f{8<<s} {vfpop(s,d)}, {vfpop(s,m)}
 added	VFPv5
 begin
-	// vcvta/vcvtn/vcvtp/vcvtm
+	// vrintx
 
 	// TODO
 end
 
-code	111011101d110111 dddd101s11m0mmmm
-asm	vcvt{cond()}.f64.f32 d{d}, s{m!rol}
-added	VFPv5+dp
-begin
-	// vcvt
-
-	// TODO
-end
-
-code	111111101d00nnnn dddd101sNom0mmmm
-exclude	................ .......1........	except	dp
-it	no
-asm	v{o?min:max}m.f{s?64:32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
-added	VFPv5
-begin
-	// vmaxm/vminm
-
-	// TODO
-end
-
-code	111111101d1110RR dddd101s01m0mmmm
-exclude	................ .......1........	except	dp
-it	no
-asm	vrint{R?a;n;p;m}.f{s?64:32} {vfpop(s,d)}, {vfpop(s,m)}
-added	VFPv5
-begin
-	// vrinta/vrintn/vrintp/vrintm
-
-	// TODO
-end
-
-code	111011101d110111 dddd101s01m0mmmm
-exclude	................ .......1........	except	dp
-asm	vrintx{cond()}.f{s?64:32} {vfpop(s,d)}, {vfpop(s,m)}
-added	VFPv5
-begin
-	// vrinta/vrintn/vrintp/vrintm
-
-	// TODO
-end
-
-code	111011101d110110 dddd101so1m0mmmm
-exclude	................ .......1........	except	dp
-asm	vrint{o?z:r}{cond()}.f{s?64:32} {vfpop(s,d)}, {vfpop(s,m)}
+code	!!!@11101d110110dddd10sso1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+asm	vrint{o?z:r}{cond()}.f{8<<s} {vfpop(s,d)}, {vfpop(s,m)}
 added	VFPv5
 begin
 	// vrintr/vrintz
@@ -7604,10 +7639,57 @@ begin
 	// TODO
 end
 
-code	111111100dccnnnn dddd101sN0m0mmmm
-exclude	................ .......1........	except	dp
+isa	A32+T32
+
+code.a	111111101d1111RRdddd10SsU1m0mmmm
+code.t	111111101d1111RRdddd10SsU1m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
 it	no
-asm	vsel{c?eq;vs;ge;gt}.f{s?64:32} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+asm	vcvt{R?a;n;p;m}.{U?u:s}32.f{8<<S's} s{d!rol}, {vfpop(S's,m)}
+added	VFPv5
+begin
+	// vcvta/vcvtn/vcvtp/vcvtm
+
+	// TODO
+end
+
+code.a	111111101d00nnnndddd10ssNom0mmmm
+code.t	111111101d00nnnndddd10ssNom0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+it	no
+asm	v{o?min:max}nm.f{8<<s} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
+added	VFPv5
+begin
+	// vmaxnm/vminnm
+
+	// TODO
+end
+
+code.a	111111101d1110RRdddd10ss01m0mmmm
+code.t	111111101d1110RRdddd101s01m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+it	no
+asm	vrint{R?a;n;p;m}.f{8<<s} {vfpop(s,d)}, {vfpop(s,m)}
+added	VFPv5
+begin
+	// vrinta/vrintn/vrintp/vrintm
+
+	// TODO
+end
+
+code.a	111111100dccnnnndddd10ssN0m0mmmm
+code.t	111111100dccnnnndddd10ssN0m0mmmm
+exclude	......................0.........	before	8+hp
+exclude	......................00........	since	8+hp
+exclude	......................11........	except	dp
+it	no
+asm	vsel{c?eq;vs;ge;gt}.f{8<<s} {vfpop(s,d)}, {vfpop(s,N'n)}, {vfpop(s,m)}
 added	VFPv5
 begin
 	// vselge/vselgt/vseleq/vselvs
@@ -9989,6 +10071,23 @@ asm	sha256su0.32 q{d>>1}, q{m>>1}
 added	8
 begin
 	// sha256su0
+	if(${cond()})
+	{
+		// TODO
+	}
+end
+
+code.a	111100111d11ss11dddd00RRUQm0mmmm
+code.t	111111111d11ss11dddd00RRUQm0mmmm
+exclude	............00..................
+exclude	............01..................	except	hp
+exclude	............11..................
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vcvt{R?a;n;p;m}.{U?u:s}32.f{8<<s} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+added	8
+begin
+	// vcvta/vcvtn/vcvtp/vcvtm
 	if(${cond()})
 	{
 		// TODO

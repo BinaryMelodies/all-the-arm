@@ -576,13 +576,13 @@ with open(DAT_FILE, 'r') as file:
 		elif op == 'asm':
 			db[current_isa][-1]['asm'] = param
 		elif op == 'asm.ual':
-			assert current_isa == 'A32' or current_isa == 'T32' or current_isa == 'coproc'
+			assert current_isa == 'A32' or current_isa == 'T32' or current_isa == 'A32+T32' or current_isa == 'coproc'
 			db[current_isa][-1]['ual'] = param
 		elif op == 'it':
-			assert current_isa == 'T32'
+			assert current_isa == 'T32' or current_isa == 'A32+T32'
 			db[current_isa][-1]['it'] = param
 		elif op == 'thumbee':
-			assert current_isa == 'T32'
+			assert current_isa == 'T32' or current_isa == 'A32+T32'
 			db[current_isa][-1]['thumbee'] = param
 		elif op == 'added':
 			db[current_isa][-1]['added'] = param
