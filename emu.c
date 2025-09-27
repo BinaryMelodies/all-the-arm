@@ -5907,6 +5907,11 @@ void cp2_perform_ldc_stc(arm_state_t * cpu, uint32_t opcode, uint32_t address);
 //void cp2_perform_mcr(arm_state_t * cpu, uint32_t opcode, uint32_t value);
 //uint32_t cp2_perform_mrc(arm_state_t * cpu, uint32_t opcode);
 
+void cp9_perform_cdp(arm_state_t * cpu, uint32_t opcode);
+void cp9_perform_ldc_stc(arm_state_t * cpu, uint32_t opcode, uint32_t address);
+void cp9_perform_mcr(arm_state_t * cpu, uint32_t opcode, uint32_t value);
+uint32_t cp9_perform_mrc(arm_state_t * cpu, uint32_t opcode);
+
 void cp10_perform_cdp(arm_state_t * cpu, uint32_t opcode);
 void cp10_perform_ldc_stc(arm_state_t * cpu, uint32_t opcode, uint32_t address);
 void cp10_perform_mcr(arm_state_t * cpu, uint32_t opcode, uint32_t value);
@@ -6031,6 +6036,13 @@ void arm_emu_init(arm_state_t * cpu, arm_configuration_t config, uint16_t suppor
 	}
 	if(arm_support_vfp_registers(cpu->config))
 	{
+		cpu->coproc[9].perform_cdp = cp9_perform_cdp;
+		cpu->coproc[9].perform_ldc_stc = cp9_perform_ldc_stc;
+		cpu->coproc[9].perform_mcr = cp9_perform_mcr;
+//		cpu->coproc[9].perform_mcrr = cp9_perform_mcrr;
+		cpu->coproc[9].perform_mrc = cp9_perform_mrc;
+//		cpu->coproc[9].perform_mrrc = cp9_perform_mrrc;
+
 		cpu->coproc[10].perform_cdp = cp10_perform_cdp;
 		cpu->coproc[10].perform_ldc_stc = cp10_perform_ldc_stc;
 		cpu->coproc[10].perform_mcr = cp10_perform_mcr;

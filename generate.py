@@ -344,6 +344,15 @@ VERSION_TYPES = {
 		},
 	},
 
+	# introduced in ARMv8.2, half precision only
+	'8.2+hp': {
+		'type': 'main',
+		'a': {
+			'version': '8.2',
+			'feature': ('fp16',),
+		},
+	},
+
 	# introduced in ARMv8.3
 	'8.3': {
 		'type': 'main',

@@ -7416,6 +7416,25 @@ begin
 		$result = $d.low[${n}];
 end
 
+code	!!!@11100000nnnndddd1001N@@1@@@@
+asm	vmov{cond()}.f16 s{N'n!rol}, r{d}
+added	8.2
+begin
+	// vmov
+
+	// TODO
+end
+
+code	!!!@11100001nnnndddd1001N@@1@@@@
+asm.ual	vmov{cond()}.f16 r{d}, s{N'n!rol}
+added	8.2
+begin
+	// vmov
+
+	// TODO
+	result = 0;
+end	
+
 code	!!!@11101110nnnndddd10100@@1@@@@
 exclude	............0000................
 exclude	............0001................
@@ -7457,6 +7476,9 @@ end
 code	!!!@11101111nnnndddd10100@@1@@@@
 exclude	............0000................
 exclude	............0001................
+exclude	............0101................	since	8
+exclude	............0110................	since	8
+exclude	............0111................	since	8
 exclude	............1000................
 asm	fmrx{cond()} r{d}, c{n}
 asm.ual	vmrs{cond()} r{d}, c{n}
@@ -7473,6 +7495,7 @@ begin
 end
 
 code	!!!@111011110001dddd10100@@1@@@@
+exclude	................1111............
 asm	fmrx{cond()} r{d}, fpscr
 asm.ual	vmrs{cond()} r{d}, fpscr
 added	VFPv1, AdvSIMDv1
@@ -7480,6 +7503,16 @@ begin
 	// fmrx fpscr
 
 	$result = cpu->vfp.fpscr;
+end
+
+code	!!!@111011110001111110100@@1@@@@
+asm	fmrstat{cond()}
+asm.ual	vmrs{cond()} apsr_nzcv, fpscr
+added	VFPv1, AdvSIMDv1
+begin
+	// fmrx fpsid
+
+	$result = cpu->vfp.fpsid;
 end
 
 code	!!!@111011111000dddd10100@@1@@@@
@@ -7490,6 +7523,30 @@ begin
 	// fmrx fpexc
 
 	$result = cpu->vfp.fpexc;
+end
+
+code	!!!@111011110101dddd10100@@1@@@@
+asm	vmrs{cond()} r{d}, mvfr2
+added	8
+begin
+	// TODO
+	$result = 0;
+end
+
+code	!!!@111011110110dddd10100@@1@@@@
+asm	vmrs{cond()} r{d}, mvfr1
+added	8
+begin
+	// TODO
+	$result = 0;
+end
+
+code	!!!@111011110111dddd10100@@1@@@@
+asm	vmrs{cond()} r{d}, mvfr0
+added	8
+begin
+	// TODO
+	$result = 0;
 end
 
 ######## VFPv2
@@ -8737,7 +8794,7 @@ exclude	...................1............
 asm	v{o?mls:mla}l{cond()}.{U?u:s}{8<<S} q{d>>1}, d{N'n}, d{m}
 added	AdvSIMDv1
 begin
-	// vmla/vmls
+	// vmlal/vmlsl
 	if(${cond()})
 	{
 		// TODO
@@ -10125,7 +10182,21 @@ begin
 	}
 end
 
+########	ARMv8.2
+
+isa	coproc
+
+code	!!!!11101d110000dddd101001m0mmmm
+asm	vmovx.f16 s{d!rol}, s{m!rol}
+added	8.2+hp
+begin
+	// vmovx
+	// TODO
+end
+
 ########	ARMv8.3
+
+isa	A32+T32
 
 code.a	1111110r1d0Snnnndddd1000NQm0mmmm
 code.t	1111110r1d0Snnnndddd1000NQm0mmmm
