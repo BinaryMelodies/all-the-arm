@@ -8734,7 +8734,7 @@ code.a	1111001U1dSSnnnndddd10o0N0m0mmmm
 code.t	111U11111dSSnnnndddd10o0N0m0mmmm
 exclude	..........11....................
 exclude	...................1............
-asm	v{o?mls:mla}l{cond()}.{U?u:s}{8<<S} Q{d>>1}, d{N'n}, d{m}
+asm	v{o?mls:mla}l{cond()}.{U?u:s}{8<<S} q{d>>1}, d{N'n}, d{m}
 added	AdvSIMDv1
 begin
 	// vmla/vmls
@@ -8778,13 +8778,16 @@ begin
 	}
 end
 
-code.a	1111001Q1d10nnnndddd0o01N1m0mmmm
-code.t	111Q11111d10nnnndddd0o01N1m0mmmm
+code.a	1111001Q1dSSnnnndddd0o01N1m0mmmm
+code.t	111Q11111dSSnnnndddd0o01N1m0mmmm
+exclude	..........00....................
+exclude	..........01....................	except	hp
+exclude	..........11....................
 exclude	.......1.......1................	for	ARM
 exclude	.......1...........1............	for	ARM
 exclude	...1...........1................	for	Thumb
 exclude	...1...............1............	for	Thumb
-asm	v{o?mls:mla}{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{m&15}[{m>>4}]
+asm	v{o?mls:mla}{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{m&15}[{m>>4}]
 added	AdvSIMDv1+sp
 begin
 	// vmla/vmls
@@ -8927,13 +8930,16 @@ begin
 	}
 end
 
-code.a	1111001Q1d10nnnndddd1001N1m0mmmm
-code.t	111Q11111d10nnnndddd1001N1m0mmmm
+code.a	1111001Q1dSSnnnndddd1001N1m0mmmm
+code.t	111Q11111dSSnnnndddd1001N1m0mmmm
+exclude	..........00....................
+exclude	..........01....................	except	hp
+exclude	..........11....................
 exclude	.......1...........1............	for	ARM
 exclude	.......1.......1................	for	ARM
 exclude	...1...............1............	for	Thumb
 exclude	...1...........1................	for	Thumb
-asm	vmul{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{m&15}[{m>>4}]
+asm	vmul{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{m&15}[{m>>4}]
 added	AdvSIMDv1+sp
 begin
 	// vmul
