@@ -3594,7 +3594,12 @@ begin
 	// addw
 	if(t32_check_condition(cpu))
 	{
-		$r[${d}] = a32_add32(cpu, $r[${n}], ${i}, false, false);
+		uint32_t base = $r[${n}];
+		if(${n} == A32_PC_NUM)
+		{
+			base &= ~3;
+		}
+		$r[${d}] = a32_add32(cpu, base, ${i}, false, false);
 	}
 end
 
@@ -3879,7 +3884,12 @@ begin
 	// subw
 	if(t32_check_condition(cpu))
 	{
-		$r[${d}] = a32_sub32(cpu, $r[${n}], ${i}, false, false);
+		uint32_t base = $r[${n}];
+		if(${n} == A32_PC_NUM)
+		{
+			base &= ~3;
+		}
+		$r[${d}] = a32_sub32(cpu, base, ${i}, false, false);
 	}
 end
 
@@ -4213,6 +4223,11 @@ begin
 	if(t32_check_condition(cpu))
 	{
 		uint32_t offset = ${o'00};
+
+		if(${n} == A32_PC_NUM)
+		{
+			offset &= ~3;
+		}
 
 		if(!${U!test})
 		{
@@ -7160,7 +7175,7 @@ begin
 	}
 end
 
-code	!!!@1101Ud0L....dddd1010.......o
+code	!!!@1101Ud0L....dddd1010........
 asm	{L?fld:fst}s{cond()} s{d!rol}, {mem_operand()}
 asm.ual	{L?vldr:vstr}{cond()} s{d!rol}, {mem_operand()}
 added	VFPv1
@@ -7176,7 +7191,7 @@ begin
 	}
 end
 
-code	!!!@1101Ud0L....dddd1011.......o
+code	!!!@1101Ud0L....dddd1011........
 exclude	.........1......................	except	D32
 asm	{L?fld:fst}d{cond()} d{d}, {mem_operand()}
 asm.ual	{L?vldr:vstr}{cond()} d{d}, {mem_operand()}

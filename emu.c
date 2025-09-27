@@ -557,21 +557,25 @@ static inline void a32_set_pc_mode(arm_state_t * cpu, uint32_t value)
 uint32_t a32_register_get32(arm_state_t * cpu, int regnum)
 {
 	regnum &= 0xF;
-	uint32_t value = a32_register(cpu, regnum) & 0xFFFFFFFF;
 	if(regnum == A32_PC_NUM)
 	{
+		uint32_t value = cpu->old_pc & 0xFFFFFFFF;
 		switch(cpu->pstate.jt)
 		{
 		case PSTATE_JT_ARM:
-			value += 4;
+			value += 8;
 			break;
 		case PSTATE_JT_THUMB:
 		case PSTATE_JT_THUMBEE:
-			value += 2;
+			value += 4;
 			break;
 		}
+		return value;
 	}
-	return value;
+	else
+	{
+		return a32_register(cpu, regnum) & 0xFFFFFFFF;
+	}
 }
 
 uint32_t a32_register_get32_lhs(arm_state_t * cpu, int regnum)
