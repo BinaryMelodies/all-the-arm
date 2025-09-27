@@ -1171,6 +1171,9 @@ int main(int argc, char * argv[], char * envp[])
 						exit(0);
 					}
 					break;
+				case ISA_AARCH32:
+				case ISA_THUMB32:
+				case ISA_THUMBEE:
 				default:
 					{
 						uint32_t swi_number;
@@ -1179,7 +1182,7 @@ int main(int argc, char * argv[], char * envp[])
 						case ISA_THUMB32:
 						case ISA_THUMBEE:
 							swi_number = arm_fetch16(cpu, cpu->r[PC] - 2) & 0x00FF;
-							if(swi_number != 0)
+							if(swi_number != 0 && swi_number != 1)
 							{
 								// only EABI allowed
 								printf("%s #0x%04X\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC", swi_number);
@@ -1191,7 +1194,53 @@ int main(int argc, char * argv[], char * envp[])
 							break;
 						}
 
-						if(swi_number == 0)
+						if(swi_number == 1 && arm_get_current_instruction_set(cpu) != ISA_THUMBEE)
+						{
+							// extension: switch modes between 26/32/64-bit modes
+							uint32_t lr = cpu->r[PC];
+							uint32_t pc = cpu->r[A32_LR];
+							if(arm_get_current_instruction_set(cpu) == ISA_AARCH26)
+							{
+								// 00: A32, 01/11: T32, 10: A64
+
+								lr &= ~3;
+
+								if((pc & 1))
+								{
+									arm_set_isa(cpu, ISA_THUMB32);
+									pc &= ~1;
+								}
+								else if((pc & 2))
+								{
+									arm_set_isa(cpu, ISA_AARCH64);
+									pc &= ~3;
+								}
+								else
+								{
+									arm_set_isa(cpu, ISA_AARCH32);
+									pc &= ~3;
+								}
+							}
+							else
+							{
+								// 00/01: A26, 10/11: A64
+
+								if(arm_get_current_instruction_set(cpu) == ISA_AARCH32)
+									lr &= ~3;
+								else
+									lr |= 1;
+
+								if((pc & 2))
+									arm_set_isa(cpu, ISA_AARCH64);
+								else
+									arm_set_isa(cpu, ISA_AARCH26);
+
+								pc = cpu->r[A32_LR] & ~3;
+							}
+							cpu->r[PC] = pc;
+							cpu->r[A32_LR] = lr;
+						}
+						else if(swi_number == 0)
 						{
 							// EABI
 							if(!a32_linux_eabi_syscall(cpu))
@@ -1218,7 +1267,35 @@ int main(int argc, char * argv[], char * envp[])
 					{
 						uint16_t swi_number = (arm_fetch32(cpu, cpu->r[PC] - 4) >> 5) & 0xFFFF;
 
-						if(swi_number != 0)
+						if(swi_number == 1)
+						{
+							// extension: switch modes between 26/32/64-bit modes
+							// 00: A32, 01/11: T32, 10: A26
+							uint32_t lr = cpu->r[PC];
+							uint32_t pc = cpu->r[A32_LR];
+
+							lr &= ~3;
+
+							if((pc & 1))
+							{
+								arm_set_isa(cpu, ISA_THUMB32);
+								pc &= ~1;
+							}
+							else if((pc & 2))
+							{
+								arm_set_isa(cpu, ISA_AARCH26);
+								pc &= ~3;
+							}
+							else
+							{
+								arm_set_isa(cpu, ISA_AARCH32);
+								pc &= ~3;
+							}
+
+							cpu->r[PC] = pc;
+							cpu->r[A32_LR] = lr;
+						}
+						else if(swi_number != 0)
 						{
 							printf("SVC #0x%04X\n", swi_number);
 							exit(0);

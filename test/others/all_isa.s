@@ -90,18 +90,33 @@ jazelle_start:
 	.byte	0xFE, 0x01
 	@ nop
 	.byte	0x00
-	@ sipush (thumb_exit+1) & 0xFFFF
+	@ sipush (jazelle_end+1) & 0xFFFF
 	.byte	0x11
-	.byte	((thumb_exit - _start + 0x8000 + 1) >> 8) & 0xFF
-	.byte	(thumb_exit - _start + 0x8000 + 1) & 0xFF
-	@ sethi (thumb_exit+1) >> 16
+	.byte	((jazelle_end+1 - _start + 0x8000) >> 8) & 0xFF
+	.byte	(jazelle_end+1 - _start + 0x8000) & 0xFF
+	@ sethi (jazelle_end+1) >> 16
 	.byte	0xED
-	.byte	((thumb_exit - _start + 0x8000 + 1) >> 24) & 0xFF
-	.byte	((thumb_exit - _start + 0x8000 + 1) >> 16) & 0xFF
+	.byte	((jazelle_end+1 - _start + 0x8000) >> 24) & 0xFF
+	.byte	((jazelle_end+1 - _start + 0x8000) >> 16) & 0xFF
 	@ ret_from_jazelle
 	.byte	0xFE, 0x00
 
 	.align	2
+	.thumb
+jazelle_end:
+	.syntax	unified
+	adr	lr, a26_start
+	.syntax	divided
+	@ extension: jump to A26 mode
+	swi	#1
+
+	.align	4
+	.arm
+a26_start:
+	adr	lr, thumb_exit+1
+	@ extension: jump to Thumb mode
+	swi	#1
+
 	.thumb
 thumb_exit:
 	mov	r7, #1
