@@ -66,7 +66,7 @@ Further options can be added using the `+` option, followed by a feature or copr
 
 The ARM instruction set is the original instruction set of ARM processors, introduced with the first version, ARMv1.
 It is a fixed length, 32-bit wide instruction encoding that can address 16 general purpose registers, each 32 bits wide, and one of which references the program counter (and in 26-bit versions, the processor status flags).
-Versions prior to ARMv5 had an implicit condition checking for all instructions, and most instructions are still conditional from ARMv5.
+Versions prior to ARMv5 had an implicit condition checking for all instructions, and most instructions are still conditional from ARMv5 on.
 
 The emulator supports multiple versions of the ARM instruction set, including 26-bit as well as 32-bit variants.
 Among others, it emulates the prototype ARMv1 with the instructions unavailable in later versions.
@@ -102,8 +102,9 @@ ARMv6-M, ARMv7-M
 
 ## Jazelle instruction set
 
-The Jazelle exection mode enables running Java bytecode directly on the processor.
+The Jazelle execution mode enables running Java bytecode directly on the processor.
 The Java bytecode is a variable length instruction set where instructions can be as short as a single byte, or take multiple parameters (always stored as big endian values) with no theoretical boundaries (such as `lookupswitch` or `tableswitch`).
+Instructions operate on the Java stack and cannot access the ARM registers directly.
 Since the Java bytecode includes many instructions that require a Java virtual machine to be running, including memory management and an object model, Jazelle does not implement all the bytecodes.
 Instead, any unimplemented bytecode would issue a call to a handler in ARM (or Thumb) mode that would simulate the missing instruction.
 
@@ -153,7 +154,7 @@ The emulator provides a rudimentary implementation, but much of the IEEE standar
 ## Vector Floating Point and Advanced SIMD instruction sets
 
 A newer floating point instruction set, introduced for ARMv5TE, the Vector Floating Point instruction set was later implemented.
-Currently, 5 versions of this instruction set are available.
+Until ARMv7, 5 versions of this instruction set are available, and later extensions are defined by the CPU version.
 
 The original VFP provided 32 single precision floating point registers that can be paired as 16 double precision floating point registers in some implementations.
 Later, the number of double precision registers was extended to 32.
