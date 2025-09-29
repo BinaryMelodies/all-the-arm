@@ -29,6 +29,7 @@ typedef struct environment_t
 
 	// input/output parameters
 	arm_configuration_t config;
+	uint16_t supported_isas;
 	arm_instruction_set_t isa;
 	arm_syntax_t syntax;
 	arm_endianness_t endian;

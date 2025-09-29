@@ -497,13 +497,20 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									if(env->purpose == PURPOSE_PARSE)
 										printf("CPU name: \"%s\"\n", buffer);
 									if(strcmp(buffer, "1") == 0)
+									{
 										env->config.version = MAX(env->config.version, ARMV1);
+										env->isa = ISA_AARCH26;
+									}
 									if(strcmp(buffer, "2") == 0)
+									{
 										env->config.version = MAX(env->config.version, ARMV2);
+										env->isa = ISA_AARCH26;
+									}
 									if(strcmp(buffer, "2a") == 0)
 									{
 										env->config.version = MAX(env->config.version, ARMV2);
 										env->config.features |= 1 << FEATURE_SWP;
+										env->isa = ISA_AARCH26;
 									}
 									if(strcmp(buffer, "3") == 0 || strcmp(buffer, "3G") == 0)
 										env->config.version = MAX(env->config.version, ARMV3);
@@ -728,7 +735,10 @@ void read_elf_file(FILE * input_file, environment_t * env)
 									case 1:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("yes\n");
-										//env->supported_isas |= 1 << ISA_AARCH32; // TODO
+										if(env->config.version == ARM_UNKNOWN || env->config.version >= ARMV3)
+											env->supported_isas |= 1 << ISA_AARCH32;
+										else
+											env->supported_isas |= 1 << ISA_AARCH26;
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -750,19 +760,19 @@ void read_elf_file(FILE * input_file, environment_t * env)
 										if(env->purpose == PURPOSE_PARSE)
 											printf("16-bit Thumb only\n");
 										env->thumb2 = MAX(env->thumb2, THUMB2_PERMITTED);
-										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
+										env->supported_isas |= 1 << ISA_THUMB32;
 										break;
 									case 2:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("32-bit Thumb\n");
 										env->thumb2 = MAX(env->thumb2, THUMB2_EXPECTED);
-										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
+										env->supported_isas |= 1 << ISA_THUMB32;
 										break;
 									case 3:
 										if(env->purpose == PURPOSE_PARSE)
 											printf("yes\n");
 										env->thumb2 = MAX(env->thumb2, THUMB2_PERMITTED);
-										//env->supported_isas |= 1 << ISA_THUMB32; // TODO
+										env->supported_isas |= 1 << ISA_THUMB32;
 										break;
 									default:
 										if(env->purpose == PURPOSE_PARSE)
@@ -1334,6 +1344,9 @@ void read_elf_file(FILE * input_file, environment_t * env)
 			}
 		}
 	}
+
+	if(env->isa == ISA_AARCH26)
+		env->stack &= 0x03FFFFFF;
 
 	init_isa(&env->config, &env->isa, &env->syntax, env->thumb2, force32bit);
 

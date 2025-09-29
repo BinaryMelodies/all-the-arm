@@ -766,7 +766,6 @@ int main(int argc, char * argv[], char * envp[])
 
 	arm_part_number_t part_number = 0;
 
-	uint16_t supported_isas = 0;
 	uint64_t load_address = -1;
 	uint64_t start_offset = 0;
 	env->entry = 0;
@@ -880,7 +879,7 @@ int main(int argc, char * argv[], char * envp[])
 					{
 						env->config.version = arm_names[index].version;
 						env->config.features = arm_names[index].features;
-						supported_isas = arm_names[index].supported_isas;
+						env->supported_isas = arm_names[index].supported_isas;
 						part_number = arm_names[index].part_number;
 						found = true;
 						break;
@@ -905,7 +904,7 @@ int main(int argc, char * argv[], char * envp[])
 						{
 							env->config.features &= ~arm_option_names[index].remove_features;
 							env->config.features |= arm_option_names[index].features;
-							supported_isas |= arm_option_names[index].supported_isas;
+							env->supported_isas |= arm_option_names[index].supported_isas;
 							env->config.fp_version = MAX(env->config.fp_version, arm_option_names[index].min_fp);
 							env->config.jazelle_implementation = MAX(env->config.jazelle_implementation, arm_option_names[index].min_java);
 							found = true;
@@ -926,6 +925,8 @@ int main(int argc, char * argv[], char * envp[])
 		}
 		argi++;
 	}
+
+	env->supported_isas |= 1 << env->isa;
 
 	env->stack = 0;
 	// Java specific
@@ -1051,7 +1052,7 @@ int main(int argc, char * argv[], char * envp[])
 	if(run)
 	{
 		arm_state_t cpu[1];
-		arm_emu_init(cpu, env->config, supported_isas | (1 << env->isa), &_memory_interface);
+		arm_emu_init(cpu, env->config, env->supported_isas, &_memory_interface);
 		arm_set_isa(cpu, env->isa);
 		cpu->part_number = part_number;
 		cpu->vendor = ARM_VENDOR_ARM;
