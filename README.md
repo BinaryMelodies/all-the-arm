@@ -227,6 +227,11 @@ Those marked with _JVM_ are assigned by the emulator, and on a typical hardware 
 | R14      | Jazelle    | -          | pointer to code on entry/exit                     |
 | R15      | ARM        | PC         | pointer to code                                   |
 
+# Extensions to the ELF format
+
+The disassembler recognizes the standard mapping symbols `$a` (for ARM mode), `$t` (for Thumb mode), `$t.x` (for ThumbEE mode) in ARM files, `$x` (for 64-bit code) in AArch64 files, and `$d` (for data) in either.
+As an extension, 32-bit and 64-bit mapping symbols may be intermixed in the same file (`$a`/`$t`/`$t.x` for 32-bit modes and `$x` for 64-bit mode), as well as `$j` for Jazelle mode.
+
 # References
 
 A variety of references were used to map out information on older as well as newer architectures.
