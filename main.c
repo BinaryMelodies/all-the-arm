@@ -772,7 +772,12 @@ int main(int argc, char * argv[], char * envp[])
 	bool run = false;
 	bool disasm = false;
 	int argi = 1;
-	bool run_as_user_mode = false;
+	enum
+	{
+		RUN_MODE_BARE_CPU, // only set up the CPU and entry point
+		RUN_MODE_MINIMAL, // set up CPU and system calls, but no initial stack
+		RUN_MODE_LINUX, // emulate system calls and initial stack
+	} run_mode = RUN_MODE_BARE_CPU;
 
 	while(argi < argc)
 	{
@@ -793,6 +798,10 @@ int main(int argc, char * argv[], char * envp[])
 			else if(argv[argi][0] == '-' && argv[argi][1] == 's' && argv[argi][2] == '=')
 			{
 				start_offset = strtoll(&argv[argi][3], NULL, 0);
+			}
+			else if(strcasecmp(argv[argi], "-u") == 0)
+			{
+				run_mode = RUN_MODE_MINIMAL;
 			}
 			else if(strcasecmp(argv[argi], "-le") == 0)
 			{
@@ -951,7 +960,7 @@ int main(int argc, char * argv[], char * envp[])
 		// ELF file
 		printf("Parsing as ELF file\n");
 
-		run_as_user_mode = true;
+		run_mode = RUN_MODE_LINUX;
 
 		if(!run && !disasm)
 		{
@@ -970,7 +979,7 @@ int main(int argc, char * argv[], char * envp[])
 		// Java class file
 		printf("Parsing as Java class file\n");
 
-		run_as_user_mode = true;
+		run_mode = RUN_MODE_LINUX;
 
 		if(!run && !disasm)
 		{
@@ -1073,7 +1082,7 @@ int main(int argc, char * argv[], char * envp[])
 			break;
 		}
 
-		if(run_as_user_mode)
+		if(run_mode != RUN_MODE_BARE_CPU)
 		{
 			// array layout:
 			/*
@@ -1101,13 +1110,38 @@ int main(int argc, char * argv[], char * envp[])
 			cpu->jaolr = (0 << JAOLR_LENGTH_OFF_SHIFT) | (9 << JAOLR_ELEMENT_OFF_SHIFT) | (3 << JAOLR_LENSHIFT_SHIFT);
 		}
 
-		setup_initial_state(cpu, env, argc - argi, &argv[argi], envp);
+		switch(run_mode)
+		{
+		case RUN_MODE_BARE_CPU:
+		case RUN_MODE_MINIMAL:
+			cpu->r[PC] = env->entry;
+			switch(arm_get_current_instruction_set(cpu))
+			{
+			case ISA_AARCH26:
+			case ISA_AARCH32:
+			case ISA_THUMB32:
+			case ISA_THUMBEE:
+			default:
+				cpu->r[A32_SP] = env->stack;
+				break;
+			case ISA_JAZELLE:
+				cpu->r[J32_TOS] = (cpu->r[J32_LOC] + env->loc_count + 3) & ~3;
+				break;
+			case ISA_AARCH64:
+				cpu->r[A64_SP] = env->stack;
+				break;
+			}
+			break;
+		case RUN_MODE_LINUX:
+			setup_initial_state(cpu, env, argc - argi, &argv[argi], envp);
+			break;
+		}
 
 		arm_parser_state_t dis[1];
 		arm_disasm_init(dis, env->config, env->isa, env->syntax);
 		arm_disasm_set_cpu(dis, cpu);
 
-		cpu->capture_breaks = run_as_user_mode;
+		cpu->capture_breaks = run_mode != RUN_MODE_BARE_CPU;
 
 		arm_debug_state_t debug_state[1];
 		arm_get_debug_state(debug_state, cpu);

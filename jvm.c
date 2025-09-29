@@ -834,6 +834,135 @@ bool j32_simulate_instruction(arm_state_t * cpu, uint32_t heap_start)
 			cpu->r[J32_HEAP] += 4 + elsize * size;
 		}
 		break;
+
+	case 0xFF:
+		switch(arm_fetch8(cpu, cpu->r[PC]++))
+		{
+		case 0x42:
+			// read_frame
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[J32_LINK]);
+			break;
+		case 0x47:
+			// priv_read_trapbase
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[J32_SHT]);
+			break;
+		case 0x4A:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[0]);
+			break;
+		case 0x4B:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[1]);
+			break;
+		case 0x4E:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[2]);
+			break;
+		case 0x4F:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[3]);
+			break;
+		case 0x56:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[4]);
+			break;
+		case 0x5A:
+			// read_global0
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[10]);
+			break;
+		case 0x5B:
+			// read_global1
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[11]);
+			break;
+		case 0x5C:
+			// read_global2
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[12]);
+			break;
+		case 0x5D:
+			// read_global3
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[14]);
+			break;
+		case 0x5E:
+			// undefined
+			// (convenience method to access ARM registers)
+			j32_push_word(cpu, cpu->r[13]);
+			break;
+		case 0x62:
+			// write_frame
+			// (convenience method to access ARM registers)
+			cpu->r[J32_LINK] = j32_pop_word(cpu);
+			break;
+		case 0x67:
+			// priv_write_trapbase
+			// (convenience method to access ARM registers)
+			cpu->r[J32_SHT] = j32_pop_word(cpu);
+			break;
+		case 0x6A:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[0] = j32_pop_word(cpu);
+			break;
+		case 0x6B:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[1] = j32_pop_word(cpu);
+			break;
+		case 0x6E:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[2] = j32_pop_word(cpu);
+			break;
+		case 0x6F:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[3] = j32_pop_word(cpu);
+			break;
+		case 0x76:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[4] = j32_pop_word(cpu);
+			break;
+		case 0x7A:
+			// write_global0
+			// (convenience method to access ARM registers)
+			cpu->r[10] = j32_pop_word(cpu);
+			break;
+		case 0x7B:
+			// write_global1
+			// (convenience method to access ARM registers)
+			cpu->r[11] = j32_pop_word(cpu);
+			break;
+		case 0x7C:
+			// write_global2
+			// (convenience method to access ARM registers)
+			cpu->r[12] = j32_pop_word(cpu);
+			break;
+		case 0x7D:
+			// write_global3
+			// (convenience method to access ARM registers)
+			cpu->r[14] = j32_pop_word(cpu);
+			break;
+		case 0x7E:
+			// undefined
+			// (convenience method to access ARM registers)
+			cpu->r[13] = j32_pop_word(cpu);
+			break;
+		default:
+			return false;
+		}
+		break;
+
 	default:
 		return false;
 	}
