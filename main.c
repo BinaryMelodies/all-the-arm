@@ -1006,6 +1006,9 @@ int main(int argc, char * argv[], char * envp[])
 		if(run)
 			memory_init();
 
+		if(load_address == (uint64_t)-1)
+			load_address = 0x8000; // imitate a RISC OS Absolute (&FF8) binary
+
 		fseek(input_file, start_offset, SEEK_SET);
 		env->entry = load_address;
 
