@@ -519,6 +519,7 @@ code	11111110aaaannnnddddCCCCbbb0mmmm
 asm	cdp2 {C}, {a}, cr{d}, cr{n}, cr{m}, {b}
 coproc	cdp
 added	5T
+removed	8
 begin
 	// cdp2
 	a32_perform_cdp(cpu, opcode);
@@ -574,6 +575,7 @@ code	11111101UNWLnnnnddddCCCCoooooooo
 asm	{L?ldc:stc}2{N?l:} {C}, cr{d}, [r{n}, #{U?:-}{o'00:X}]{W?!:}
 coproc	ldc
 added	5T
+removed	8
 begin
 	// ldc2/stc2
 
@@ -586,6 +588,7 @@ code	11111100UN1LnnnnddddCCCCoooooooo
 asm	{L?ldc:stc}2{N?l:} {C}, cr{d}, [r{n}], #{U?:-}{o'00:X}
 coproc	ldc
 added	5T
+removed	8
 begin
 	// ldc2/stc2
 
@@ -598,6 +601,7 @@ code	111111001N0LnnnnddddCCCCoooooooo
 asm	{L?ldc:stc}2{N?l:} {C}, cr{d}, [r{n}], {o}
 coproc	ldc
 added	5T
+removed	8
 begin
 	// ldc2/stc2
 
@@ -621,6 +625,7 @@ code	11111110aaa0nnnnddddCCCCbbb1mmmm
 asm	mcr2 {C}, {a}, r{d}, cr{n}, cr{m}, {b}
 coproc	mcr
 added	5T
+removed	8
 begin
 	// mcr2
 
@@ -644,6 +649,7 @@ code	11111110aaa1nnnnddddCCCCbbb1mmmm
 asm	mrc2 {C}, {a}, r{d}, cr{n}, cr{m}, {b}
 coproc	mrc
 added	5T
+removed	8
 begin
 	// mrc2
 
@@ -1291,6 +1297,7 @@ code	111111000100TTTTttttCCCCaaaammmm
 asm	mcrr2 {C}, {a}, r{t}, r{T}, cr{m}
 coproc	mcrr
 added	6
+removed	8
 begin
 	// mcrr2
 
@@ -1314,6 +1321,7 @@ code	111111000101TTTTttttCCCCaaaammmm
 asm	mrrc2 {C}, {a}, r{t}, r{T}, cr{m}
 coproc	mrrc
 added	6
+removed	8
 begin
 	// mrrc2
 
@@ -4142,6 +4150,7 @@ begin
 end
 
 code	111E1110aaaannnn ddddCCCCbbb0mmmm
+exclude	...1............ ................	since	8
 asm	cdp{E?2:}{cond()} {C}, {a}, cr{d}, cr{n}, cr{m}, {b}
 coproc	cdp
 added	6T2
@@ -4215,6 +4224,7 @@ begin
 end
 
 code	111E1101UNWLnnnn ddddCCCCoooooooo
+exclude	...1............ ................	since	8
 asm	{L?ldc:stc}{E?2:}{N?l:}{cond()} {C}, cr{d}, [r{n}, #{U?:-}{o'00:X}]{W?!:}
 coproc	ldc
 added	6T2
@@ -4239,6 +4249,7 @@ begin
 end
 
 code	111E1100UN1Lnnnn ddddCCCCoooooooo
+exclude	...1............ ................	since	8
 asm	{L?ldc:stc}{E?2:}{N?l:}{cond()} {C}, cr{d}, [r{n}], #{U?:-}{o'00:X}
 coproc	ldc
 added	6T2
@@ -4258,6 +4269,7 @@ begin
 end
 
 code	111E11001N0Lnnnn ddddCCCCoooooooo
+exclude	...1............ ................	since	8
 asm	{L?ldc:stc}{E?2:}{N?l:}{cond()} {C}, cr{d}, [r{n}], {o}
 coproc	ldc
 added	6T2
@@ -4747,6 +4759,7 @@ begin
 end
 
 code	111E1110aaa0nnnn ddddCCCCbbb1mmmm
+exclude	...1............ ................	since	8
 asm	mcr{E?2:}{cond()} {C}, {a}, r{d}, cr{n}, cr{m}, {b}
 coproc	mcr
 added	6T2
@@ -4759,6 +4772,7 @@ begin
 end
 
 code	111E1110aaa1nnnn ddddCCCCbbb1mmmm
+exclude	...1............ ................	since	8
 asm	mrc{E?2:}{cond()} {C}, {a}, r{d}, cr{n}, cr{m}, {b}
 coproc	mrc
 added	6T2
@@ -4771,6 +4785,7 @@ begin
 end
 
 code	111E11000100TTTT ttttCCCCaaaammmm
+exclude	...1............ ................	since	8
 asm	mcrr{E?2:}{cond()} {C}, {a}, r{t}, r{T}, cr{m}
 coproc	mcrr
 added	6T2
@@ -4783,6 +4798,7 @@ begin
 end
 
 code	111E11000101TTTT ttttCCCCaaaammmm
+exclude	...1............ ................	since	8
 asm	mrrc{E?2:}{cond()} {C}, {a}, r{t}, r{T}, cr{m}
 coproc	mrrc
 added	6T2
@@ -7727,7 +7743,7 @@ begin
 end
 
 code.a	111111101d1110RRdddd10ss01m0mmmm
-code.t	111111101d1110RRdddd101s01m0mmmm
+code.t	111111101d1110RRdddd10ss01m0mmmm
 exclude	......................0.........	before	8+hp
 exclude	......................00........	since	8+hp
 exclude	......................11........	except	dp
@@ -8817,15 +8833,15 @@ begin
 	}
 end
 
-code.a	1111001Q1d.Snnnndddd0o00N1m0mmmm
-code.t	111Q11111d.Snnnndddd0o00N1m0mmmm
+code.a	1111001Q1dSSnnnndddd0o00N1m0mmmm
+code.t	111Q11111dSSnnnndddd0o00N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	.......1.......1................	for	ARM
 exclude	.......1...........1............	for	ARM
 exclude	...1...........1................	for	Thumb
 exclude	...1...............1............	for	Thumb
-asm	v{o?mls:mla}{cond()}.i{S?16:32} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	v{o?mls:mla}{cond()}.i{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vmla/vmls
@@ -8838,7 +8854,7 @@ end
 code.a	1111001Q1dSSnnnndddd0o01N1m0mmmm
 code.t	111Q11111dSSnnnndddd0o01N1m0mmmm
 exclude	..........00....................
-exclude	..........01....................	except	hp
+exclude	..........01....................	before	8+hp
 exclude	..........11....................
 exclude	.......1.......1................	for	ARM
 exclude	.......1...........1............	for	ARM
@@ -8854,12 +8870,12 @@ begin
 	}
 end
 
-code.a	1111001U1d.Snnnndddd0o10N1m0mmmm
-code.t	111U11111d.Snnnndddd0o10N1m0mmmm
+code.a	1111001U1dSSnnnndddd0o10N1m0mmmm
+code.t	111U11111dSSnnnndddd0o10N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	...................1............
-asm	v{o?mls:mla}l{cond()}.{U?u:s}{S?16:32} q{d>>1}, d{N'n}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	v{o?mls:mla}l{cond()}.{U?u:s}{8<<S} q{d>>1}, d{N'n}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vmlal/vmlsl
@@ -8940,7 +8956,7 @@ code.t	111U11111dSSnnnndddd11o0N0m0mmmm
 exclude	..........11....................
 exclude	.......1..............1.........	for	ARM
 exclude	...1..................1.........	for	Thumb
-exclude	..........1...........1.........
+exclude	..........1...........1.........	except	crypto
 exclude	...........1..........1.........
 exclude	...................1............
 asm	vmull{cond()}.{o'U?s;u;p} q{d>>1}, d{n}, d{m}
@@ -8969,15 +8985,15 @@ begin
 	}
 end
 
-code.a	1111001Q1d.Snnnndddd1000N1m0mmmm
-code.t	111Q11111d.Snnnndddd1000N1m0mmmm
+code.a	1111001Q1dSSnnnndddd1000N1m0mmmm
+code.t	111Q11111dSSnnnndddd1000N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	.......1...........1............	for	ARM
 exclude	.......1.......1................	for	ARM
 exclude	...1...............1............	for	Thumb
 exclude	...1...........1................	for	Thumb
-asm	vmul{cond()}.i{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vmul{cond()}.i{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vmul
@@ -8990,7 +9006,7 @@ end
 code.a	1111001Q1dSSnnnndddd1001N1m0mmmm
 code.t	111Q11111dSSnnnndddd1001N1m0mmmm
 exclude	..........00....................
-exclude	..........01....................	except	hp
+exclude	..........01....................	before	8+hp
 exclude	..........11....................
 exclude	.......1...........1............	for	ARM
 exclude	.......1.......1................	for	ARM
@@ -9006,12 +9022,12 @@ begin
 	}
 end
 
-code.a	1111001U1d.Snnnndddd1010N1m0mmmm
-code.t	111U11111d.Snnnndddd1010N1m0mmmm
+code.a	1111001U1dSSnnnndddd1010N1m0mmmm
+code.t	111U11111dSSnnnndddd1010N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	...................1............
-asm	vmull{cond()}.{U?u:s}{16<<S} q{d>>1}, d{N'n}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vmull{cond()}.{U?u:s}{8<<S} q{d>>1}, d{N'n}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vmull
@@ -9066,11 +9082,14 @@ begin
 	}
 end
 
-code.a	111100111d111001dddd01111Qm0mmmm
-code.t	111111111d111001dddd01111Qm0mmmm
+code.a	111100111d11SS01dddd01111Qm0mmmm
+code.t	111111111d11SS01dddd01111Qm0mmmm
+exclude	............00..................
+exclude	............01..................	before	8+hp
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vneg{cond()}.f32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vneg{cond()}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1
 begin
 	// vneg
@@ -9167,6 +9186,7 @@ end
 
 code.a	111100111d11SS00dddd0010UQm0mmmm
 code.t	111111111d11SS00dddd0010UQm0mmmm
+exclude	............11..................
 exclude	...................1.....1......
 exclude	.........................1.....1
 asm	vpaddl{cond()}.{U?u:s}{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
@@ -9250,12 +9270,12 @@ begin
 	}
 end
 
-code.a	111100101d.Snnnndddd0o11N1m0mmmm
-code.t	111011111d.Snnnndddd0o11N1m0mmmm
+code.a	111100101dSSnnnndddd0o11N1m0mmmm
+code.t	111011111dSSnnnndddd0o11N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	...................1............
-asm	vqd{o?mlsl:mlal}{cond()}.s{16<<S} q{d>>1}, d{N'n}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vqd{o?mlsl:mlal}{cond()}.s{8<<S} q{d>>1}, d{N'n}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vqdmlal/vqdmlsl
@@ -9282,13 +9302,13 @@ begin
 	}
 end
 
-code.a	1111001Q1d.Snnnndddd1100N1m0mmmm
-code.t	111Q11111d.Snnnndddd1100N1m0mmmm
+code.a	1111001Q1dSSnnnndddd1100N1m0mmmm
+code.t	111Q11111dSSnnnndddd1100N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	...............1.........1......
 exclude	...................1.....1......
-asm	vqdmulh{cond()}.s{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vqdmulh{cond()}.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vqdmulh
@@ -9313,12 +9333,12 @@ begin
 	}
 end
 
-code.a	111100101d.Snnnndddd1011N1m0mmmm
-code.t	111011111d.Snnnndddd1011N1m0mmmm
+code.a	111100101dSSnnnndddd1011N1m0mmmm
+code.t	111011111dSSnnnndddd1011N1m0mmmm
 exclude	..........11....................
 exclude	..........00....................
 exclude	...................1............
-asm	vqdmull{cond()}.s{16<<S} q{d>>1}, d{N'n}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vqdmull{cond()}.s{8<<S} q{d>>1}, d{N'n}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vqdmull
@@ -9381,7 +9401,7 @@ exclude	..........00....................
 exclude	..........11....................
 exclude	...............1.........1......
 exclude	...................1.....1......
-asm	vqrdmulh{cond()}.s{16<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,4-S)}[{m<<S>>4}]
+asm	vqrdmulh{cond()}.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
 added	AdvSIMDv1
 begin
 	// vqrdmulh
@@ -9516,12 +9536,15 @@ begin
 	}
 end
 
-code.a	111100111d111011dddd010F0Qm0mmmm
-code.t	111111111d111011dddd010F0Qm0mmmm
+code.a	111100111d11SS11dddd010F0Qm0mmmm
+code.t	111111111d11SS11dddd010F0Qm0mmmm
+exclude	............00..................
+exclude	............01..................	before	8+hp
+exclude	............11..................
 exclude	.......................1........	except	sp
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vrecpe{cond()}.{F?f:u}32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vrecpe{cond()}.{F?f:u}{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1
 begin
 	// vrecpe
@@ -9602,7 +9625,7 @@ code.t	111U11111diiiiiidddd0010LQm1mmmm
 exclude	..........000...........0.......
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vrshr.{U?u:s}{simd_shift_size(L'i)} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{simd_shift_amount_neg(L'i)}
+asm	vrshr{cond()}.{U?u:s}{simd_shift_size(L'i)} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}, #{simd_shift_amount_neg(L'i)}
 added	AdvSIMDv1
 begin
 	// vrshr
@@ -9615,7 +9638,7 @@ end
 code.a	111100101d001iiidddd100001m1mmmm
 code.t	111011111d001iiidddd100001m1mmmm
 exclude	...............................1
-asm	vrshrn.i8 d{d}, q{m>>1}, #{8-i}
+asm	vrshrn{cond()}.i8 d{d}, q{m>>1}, #{8-i}
 added	AdvSIMDv1
 begin
 	// vrshrn
@@ -9628,7 +9651,7 @@ end
 code.a	111100101d01iiiidddd100001m1mmmm
 code.t	111011111d01iiiidddd100001m1mmmm
 exclude	...............................1
-asm	vrshrn.i16 d{d}, q{m>>1}, #{16-i}
+asm	vrshrn{cond()}.i16 d{d}, q{m>>1}, #{16-i}
 added	AdvSIMDv1
 begin
 	// vrshrn
@@ -9641,7 +9664,7 @@ end
 code.a	111100101d1iiiiidddd100001m1mmmm
 code.t	111011111d1iiiiidddd100001m1mmmm
 exclude	...............................1
-asm	vrshrn.i32 d{d}, q{m>>1}, #{32-i}
+asm	vrshrn{cond()}.i32 d{d}, q{m>>1}, #{32-i}
 added	AdvSIMDv1
 begin
 	// vrshrn
@@ -9651,12 +9674,15 @@ begin
 	}
 end
 
-code.a	111100111d111011dddd010F1Qm0mmmm
-code.t	111111111d111011dddd010F1Qm0mmmm
+code.a	111100111d11SS11dddd010F1Qm0mmmm
+code.t	111111111d11SS11dddd010F1Qm0mmmm
+exclude	............00..................
+exclude	............01..................	before	8+hp
+exclude	............11..................
 exclude	.......................1........	except	sp
 exclude	...................1.....1......
 exclude	.........................1.....1
-asm	vrsqrte{cond()}.{F?f:u}32 {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+asm	vrsqrte{cond()}.{F?f:u}{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
 added	AdvSIMDv1
 begin
 	// vrsqrte
@@ -10054,7 +10080,7 @@ code.t	111111111d110000dddd00110Dm0mmmm
 exclude	...................1............
 exclude	...............................1
 asm	aes{D?d:e}.8 q{d>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// aesd/aese
 	if(${cond()})
@@ -10068,7 +10094,7 @@ code.t	111111111d110000dddd00111Dm0mmmm
 exclude	...................1............
 exclude	...............................1
 asm	aes{D?i:}mc.8 q{d>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// aemc/aesimc
 	if(${cond()})
@@ -10083,7 +10109,7 @@ exclude	...............1................
 exclude	...................1............
 exclude	...............................1
 asm	sha1{o?c;p;m;su0}.32 q{d>>1}, q{N'n>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// sha1c;sha1p;sha1m;sha1su0
 	if(${cond()})
@@ -10097,7 +10123,7 @@ code.t	111111110d111001dddd001011m0mmmm
 exclude	...................1............
 exclude	...............................1
 asm	sha1h.32 q{d>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// sha1h
 	if(${cond()})
@@ -10111,7 +10137,7 @@ code.t	111111111d111010dddd001110m0mmmm
 exclude	...................1............
 exclude	...............................1
 asm	sha1su1.32 q{d>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// sha1su1
 	if(${cond()})
@@ -10126,7 +10152,7 @@ exclude	..........11....................
 exclude	...................1............
 exclude	...............................1
 asm	sha256{o?h;h2;su1}.32 q{d>>1}, q{N'n>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// sha256h/sha256h2/sha256su1
 	if(${cond()})
@@ -10140,7 +10166,7 @@ code.t	111111111d111010dddd001111m0mmmm
 exclude	...................1............
 exclude	...............................1
 asm	sha256su0.32 q{d>>1}, q{m>>1}
-added	8
+added	8+crypto
 begin
 	// sha256su0
 	if(${cond()})
@@ -10182,11 +10208,126 @@ begin
 	}
 end
 
+code.a	111100111d11SS10dddd01oo.Qm0mmmm
+code.t	111111111d11SS10dddd01oo.Qm0mmmm
+exclude	............00..................
+exclude	............01..................	except	hp
+exclude	............11..................
+exclude	......................0.1.......
+exclude	......................1.0.......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vrint{o?n;a;m;p}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+added	8
+begin
+	// vrintn/vrinta/vrintm/vrintp
+	// TODO
+end
+
+code.a	111100111d11SS10dddd010z1Qm0mmmm
+code.t	111111111d11SS10dddd010z1Qm0mmmm
+exclude	............00..................
+exclude	............01..................	except	hp
+exclude	............11..................
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vrint{z?z:x}.f{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{m>>Q}
+added	8
+begin
+	// vrintx/vrintz
+	// TODO
+end
+
+########	ARMv8.1
+
+code.a	111100110dSSnnnndddd1011NQm1mmmm
+code.t	111111110dSSnnnndddd1011NQm1mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmlah.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+added	8.1
+begin
+	// vqdmlah
+	// TODO
+end
+
+code.a	1111001Q1dSSnnnndddd1110N1m0mmmm
+code.t	111Q11111dSSnnnndddd1110N1m0mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmlah.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
+added	8.1
+begin
+	// vqdmlah
+	// TODO
+end
+
+code.a	111100110dSSnnnndddd1100NQm1mmmm
+code.t	111111110dSSnnnndddd1100NQm1mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmlah.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+added	8.1
+begin
+	// vqdmlsh
+	// TODO
+end
+
+code.a	1111001Q1dSSnnnndddd1111N1m0mmmm
+code.t	111Q11111dSSnnnndddd1111N1m0mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmlah.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
+added	8.1
+begin
+	// vqdmlsh
+	// TODO
+end
+
+code.a	111100110dSSnnnndddd1011NQm0mmmm
+code.t	111111110dSSnnnndddd1011NQm0mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmulh.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+added	8.1
+begin
+	// vqdmulh
+	// TODO
+end
+
+code.a	1111001Q1dSSnnnndddd1101N1m0mmmm
+code.t	111Q11111dSSnnnndddd1101N1m0mmmm
+exclude	..........00....................
+exclude	..........11....................
+exclude	...............1.........1......
+exclude	...................1.....1......
+exclude	.........................1.....1
+asm	vqrdmulh.s{8<<S} {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{mask(m,2+S)}[{m>>S>>2}]
+added	8.1
+begin
+	// vqdmulh
+	// TODO
+end
+
 ########	ARMv8.2
 
-isa	coproc
-
-code	!!!!11101d110000dddd101001m0mmmm
+code.a	111111101d110000dddd101001m0mmmm
+code.t	111111101d110000dddd101001m0mmmm
 asm	vmovx.f16 s{d!rol}, s{m!rol}
 added	8.2+hp
 begin
@@ -10194,9 +10335,30 @@ begin
 	// TODO
 end
 
-########	ARMv8.3
+code.a	111111100d10nnnndddd1101NQMUmmmm
+code.t	111111100d10nnnndddd1101NQMUmmmm
+exclude	...................1.....1......
+exclude	........................11......
+asm	v{U?u:s}dot.{U?u:s}8 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, d{m}[{M}]
+added	8.2+dotp
+begin
+	// vsdot/vudot
+	// TODO
+end
 
-isa	A32+T32
+code.a	111111000d10nnnndddd1101NQmUmmmm
+code.t	111111000d10nnnndddd1101NQmUmmmm
+exclude	...................1.....1......
+exclude	........................11......
+exclude	.........................1.....1
+asm	v{U?u:s}dot.{U?u:s}8 {Q?q:d}{d>>Q}, {Q?q:d}{N'n>>Q}, {Q?q:d}{m>>Q}
+added	8.2+dotp
+begin
+	// vsdot/vudot
+	// TODO
+end
+
+########	ARMv8.3
 
 code.a	1111110r1d0Snnnndddd1000NQm0mmmm
 code.t	1111110r1d0Snnnndddd1000NQm0mmmm

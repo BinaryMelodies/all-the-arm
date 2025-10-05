@@ -130,6 +130,7 @@ typedef enum arm_feature_t
 	FEATURE_ARM64, // 8-A
 	FEATURE_M_BASE, // 8-M Baseline (TODO)
 	FEATURE_M_MAIN, // 8-M Mainline (TODO)
+	FEATURE_CRYPTOGRAPHY,
 
 	FEATURE_FPA, // (1989) Floating Point Accelerator, WE32206 compatible floating point, product names: AKA20 (for ARM2 (v2)), FPA10 (for ARM3/ARM600 (v3)), FPA11 (for ARM700 (v3))
 	FEATURE_VFP, // Virtual Floating Point, 32-bit floating point support

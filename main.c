@@ -445,7 +445,7 @@ static const struct
 	{ "simdv1", 0, (1 << FEATURE_SIMD), .min_fp = ARM_VFPV3 },
 	{ "simdv2", 0, (1 << FEATURE_SIMD), .min_fp = ARM_VFPV4 },
 	{ "crc", 0, 0 }, // TODO, minimum armv8
-	{ "crypto", 0, 0 }, // TODO
+	{ "crypto", 0, (1 << FEATURE_CRYPTOGRAPHY) },
 	{ "sb", 0, 0 }, // TODO
 	{ "predres", 0, 0 }, // TODO
 	{ "fp16fml", 0, 0 }, // TODO

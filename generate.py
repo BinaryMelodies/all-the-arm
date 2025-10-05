@@ -51,6 +51,8 @@ FEATURE_LIST = {
 	'Z': "FEATURE_SECURITY",
 	'VE': "FEATURE_VIRTUALIZATION",
 
+	'crypto': "FEATURE_CRYPTOGRAPHY",
+
 	'VFP': "FEATURE_VFP",
 	'D': "FEATURE_DREG",
 	'D32': "FEATURE_32_DREG",
@@ -317,6 +319,15 @@ VERSION_TYPES = {
 		},
 	},
 
+	# introduced with cryptographic extensions
+	'8+crypto': {
+		'type': 'main',
+		'a': {
+			'version': '8',
+			'feature': ('crypto',),
+		},
+	},
+
 	# introduced in ARMv8-R, R-Profile only
 	'8-R': {
 		'type': 'main',
@@ -350,6 +361,14 @@ VERSION_TYPES = {
 		'a': {
 			'version': '8.2',
 			'feature': ('fp16',),
+		},
+	},
+
+	'8.2+dotp': {
+		'type': 'main',
+		'a': {
+			'version': '8.2',
+			'feature': (), # ('dotp',), # TODO
 		},
 	},
 
@@ -513,6 +532,8 @@ FEATURES = {
 	'dp': 'D',
 	'D32': 'D32',
 	'hp': 'fp16',
+
+	'crypto': 'crypto',
 }
 
 # these are processed as if they were separate instruction sets, but they are just coprocessor operation specializations
