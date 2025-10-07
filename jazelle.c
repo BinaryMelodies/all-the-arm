@@ -294,9 +294,8 @@ void j32_write_local_word(arm_state_t * cpu, uint32_t offset, uint32_t value)
 #if J32_EMULATE_INTERNALS
 	if(offset == 0)
 		a32_register_set32(cpu, J32_LOC0, value);
-	else
 #endif
-		a32_write32(cpu, a32_register_get32(cpu, J32_LOC) + offset * 4, value);
+	a32_write32(cpu, a32_register_get32(cpu, J32_LOC) + offset * 4, value);
 }
 
 void j32_write_local_dword(arm_state_t * cpu, uint32_t offset, uint64_t value)

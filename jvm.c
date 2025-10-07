@@ -471,6 +471,10 @@ void read_class_file(FILE * input_file, environment_t * env)
 						{
 							syscall_number = A32_SYS_WRITE;
 						}
+						else if(CHECK_NAME_TYPE(constant_pool[constant_pool[i].methodref.name_and_type_index].name_and_type, "read", "(I[BII)I"))
+						{
+							syscall_number = A32_SYS_READ;
+						}
 						else if(CHECK_NAME_TYPE(constant_pool[constant_pool[i].methodref.name_and_type_index].name_and_type, "brk", "(I)I"))
 						{
 							syscall_number = A32_SYS_BRK;
@@ -709,39 +713,8 @@ bool j32_simulate_instruction(arm_state_t * cpu, uint32_t heap_start)
 			{
 				// system call
 				uint32_t syscall_num = arm_memory_read32_data(cpu, method_address + 8);
-				switch(syscall_num)
-				{
-				case A32_SYS_EXIT:
-					{
-						int32_t status = j32_pop_word(cpu);
-						exit(status);
-					}
-					break;
-				case A32_SYS_WRITE:
-					{
-						int32_t count = j32_pop_word(cpu);
-						uint32_t buf = j32_pop_word(cpu);
-						int32_t offset = j32_pop_word(cpu);
-						int32_t fd = j32_pop_word(cpu);
-
-						void * buffer = memory_acquire_block(buf + offset, count);
-						int32_t result = write(fd, buffer, count);
-						memory_release_block(buf + offset, count, buffer);
-
-						j32_push_word(cpu, result);
-					}
-					break;
-				case A32_SYS_BRK:
-					{
-						int32_t new_heap = j32_pop_word(cpu);
-						j32_push_word(cpu, cpu->r[J32_HEAP]);
-						if(new_heap >= (int32_t)heap_start)
-							cpu->r[J32_HEAP] = new_heap;
-					}
-					break;
-				default:
+				if(!j32_linux_syscall(cpu, syscall_num))
 					return false;
-				}
 				cpu->r[PC] += 2;
 			}
 			else

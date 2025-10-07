@@ -1577,6 +1577,30 @@ bool a32_linux_oabi_syscall(arm_state_t * cpu, uint32_t swi_number)
 	case A32_OABI_SYS_BASE + A32_SYS_EXIT:
 		exit(cpu->r[0]);
 		return true;
+	case A32_OABI_SYS_BASE + A32_SYS_READ:
+		{
+			uint64_t address = cpu->r[1];
+			uint64_t count = cpu->r[2];
+			void * buffer;
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+				buffer = memory_acquire_block(address, count);
+			else
+				buffer = memory_acquire_block_reversed(address, count);
+
+			cpu->r[0] = read(cpu->r[0], buffer, count);
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+			{
+				memory_synchronize_block(address, count, buffer);
+				memory_release_block(address, count, buffer);
+			}
+			else
+			{
+				memory_synchronize_block_reversed(address, count, buffer);
+				memory_release_block_reversed(address, count, buffer);
+			}
+		}
 	case A32_OABI_SYS_BASE + A32_SYS_WRITE:
 		{
 			uint64_t address = cpu->r[1];
@@ -1607,6 +1631,31 @@ bool a32_linux_eabi_syscall(arm_state_t * cpu)
 	{
 	case A32_SYS_EXIT:
 		exit(cpu->r[0]);
+		return true;
+	case A32_SYS_READ:
+		{
+			uint64_t address = cpu->r[1];
+			uint64_t count = cpu->r[2];
+			void * buffer;
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+				buffer = memory_acquire_block(address, count);
+			else
+				buffer = memory_acquire_block_reversed(address, count);
+
+			cpu->r[0] = read(cpu->r[0], buffer, count);
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+			{
+				memory_synchronize_block(address, count, buffer);
+				memory_release_block(address, count, buffer);
+			}
+			else
+			{
+				memory_synchronize_block_reversed(address, count, buffer);
+				memory_release_block_reversed(address, count, buffer);
+			}
+		}
 		return true;
 	case A32_SYS_WRITE:
 		{
@@ -1639,6 +1688,16 @@ bool a64_linux_syscall(arm_state_t * cpu)
 	case A64_SYS_EXIT:
 		exit(cpu->r[0]);
 		return true;
+	case A64_SYS_READ:
+		{
+			uint64_t address = cpu->r[1];
+			uint64_t count = cpu->r[2];
+			void * buffer = memory_acquire_block(address, count);
+			cpu->r[0] = read(cpu->r[0], buffer, count);
+			memory_synchronize_block(address, count, buffer);
+			memory_release_block(address, count, buffer);
+		}
+		return true;
 	case A64_SYS_WRITE:
 		{
 			uint64_t address = cpu->r[1];
@@ -1653,23 +1712,62 @@ bool a64_linux_syscall(arm_state_t * cpu)
 	}
 }
 
-bool j32_linux_syscall(arm_state_t * cpu)
+bool j32_linux_syscall(arm_state_t * cpu, uint32_t syscall_number)
 {
-	uint32_t syscall_number = j32_peek_word(cpu, 0);
+	bool picojava_syscall = syscall_number == (uint32_t)-1;
+	if(picojava_syscall)
+		syscall_number = j32_peek_word(cpu, 0);
+
 	switch(syscall_number)
 	{
 	case A32_SYS_EXIT:
 		{
-			j32_pop_word(cpu);
+			if(picojava_syscall)
+				j32_pop_word(cpu);
 			int32_t status = j32_pop_word(cpu);
 			exit(status);
 		}
 		return true;
-	case A32_SYS_WRITE:
+	case A32_SYS_READ:
 		{
-			j32_pop_word(cpu);
+			if(picojava_syscall)
+				j32_pop_word(cpu);
+
 			int32_t count = j32_pop_word(cpu);
 			uint32_t address = j32_pop_word(cpu);
+			address += picojava_syscall ? 0 : (int32_t)j32_pop_word(cpu);
+			int32_t fd = j32_pop_word(cpu);
+			void * buffer;
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+				buffer = memory_acquire_block(address, count);
+			else
+				buffer = memory_acquire_block_reversed(address, count);
+
+			uint32_t result = read(fd, buffer, count);
+
+			j32_push_word(cpu, result);
+
+			if(a32_get_data_endianness(cpu) != ARM_ENDIAN_SWAPPED)
+			{
+				memory_synchronize_block(address, count, buffer);
+				memory_release_block(address, count, buffer);
+			}
+			else
+			{
+				memory_synchronize_block_reversed(address, count, buffer);
+				memory_release_block_reversed(address, count, buffer);
+			}
+		}
+		return true;
+	case A32_SYS_WRITE:
+		{
+			if(picojava_syscall)
+				j32_pop_word(cpu);
+
+			int32_t count = j32_pop_word(cpu);
+			uint32_t address = j32_pop_word(cpu);
+			address += picojava_syscall ? 0 : (int32_t)j32_pop_word(cpu);
 			int32_t fd = j32_pop_word(cpu);
 			void * buffer;
 

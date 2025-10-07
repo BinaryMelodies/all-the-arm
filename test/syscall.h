@@ -78,4 +78,34 @@ long write(int fd, const void * buf, unsigned long count)
 	return result;
 }
 
+long read(int fd, void * buf, unsigned long count)
+{
+#if __arm__
+	register int r0 asm("r0") = fd;
+	register void * r1 asm("r1") = buf;
+	register unsigned long r2 asm("r2") = count;
+	register long result asm("r0");
+# if __thumb__
+	asm volatile("push\t{r7}\n"
+		"\tmov\tr7, #3\n"
+		"\tswi\t0\n"
+		"\tpop\t{r7}" : : "r"(r0));
+# else
+	// the Thumb generator uses r7 as the frame pointer
+	register int r7 asm("r7") = 3;
+	asm volatile("swi\t0" : "=r"(result) : "r"(r0), "r"(r1), "r"(r2), "r"(r7));
+# endif
+#elif __aarch64__
+	register int w0 asm("w0") = fd;
+	register void * x1 asm("x1") = buf;
+	register unsigned long x2 asm("x2") = count;
+	register long result asm("x0");
+	register int w8 asm("w8") = 63;
+	asm volatile("svc\t0" : "=r"(result) : "r"(w0), "r"(x1), "r"(x2), "r"(w8));
+#else
+# error
+#endif
+	return result;
+}
+
 #endif /* _SYSCALL_H */

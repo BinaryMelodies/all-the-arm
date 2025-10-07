@@ -1202,7 +1202,7 @@ int main(int argc, char * argv[], char * envp[])
 				switch(arm_get_current_instruction_set(cpu))
 				{
 				case ISA_JAZELLE:
-					if(!j32_linux_syscall(cpu))
+					if(!j32_linux_syscall(cpu, -1))
 					{
 						printf("%s\n", env->syntax == SYNTAX_DIVIDED ? "SWI" : "SVC");
 						printf("Unknown Jazelle system call: %d\n", j32_peek_word(cpu, 0));

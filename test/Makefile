@@ -3,6 +3,7 @@ all: syscall.so abi/Linux.class
 	make -C hello
 	make -C div10
 	make -C env
+	make -C cat
 	make -C others
 
 clean:
@@ -10,6 +11,7 @@ clean:
 	make -C hello clean
 	make -C div10 clean
 	make -C env clean
+	make -C cat clean
 	make -C others clean
 
 distclean: clean
@@ -17,6 +19,7 @@ distclean: clean
 	make -C hello distclean
 	make -C div10 distclean
 	make -C env distclean
+	make -C cat distclean
 	make -C others distclean
 
 abi/Linux.class: abi/Linux.java

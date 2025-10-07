@@ -158,7 +158,7 @@ extern bool a32_linux_oabi_syscall(arm_state_t * cpu, uint32_t swi_number);
 extern bool a32_linux_eabi_syscall(arm_state_t * cpu);
 extern bool a64_linux_syscall(arm_state_t * cpu);
 
-// simulates a Linux syscall from Jazelle mode
-extern bool j32_linux_syscall(arm_state_t * cpu);
+// simulates a Linux syscall from Jazelle mode; if syscall_number == 0xFFFFFFFF, then load syscall number from Java stack
+extern bool j32_linux_syscall(arm_state_t * cpu, uint32_t syscall_number);
 
 #endif // _ELF_H
